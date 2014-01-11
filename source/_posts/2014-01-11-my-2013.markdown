@@ -3,7 +3,7 @@ layout: post
 title: "我的 2013"
 date: 2014-01-11 17:19:51 +0800
 comments: true
-categories: life, summary
+categories: life summary
 ---
 
 2013年飞逝而过！对我来说，这一年真如坐过山车，起起伏伏，**人生如梦**的感慨对我的2013来说最是贴切。这篇日志是对我的2013年的总结，也是对这神奇一年的备忘！
