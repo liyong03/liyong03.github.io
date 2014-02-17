@@ -24,9 +24,11 @@ ReactiveCocoa 的核心是*信号 (signal)* ，信号代表了不同时间发生
 
 iOS App 中得输入框(Text Field)在输入文字发生改变时会产生的事件会生成信号。ReactiveCocoa 的 UITextField 分类(Category)有一个方法：*rac_textSignal*，我们可以这样订阅这个事件：
 
+``` objc
     [self.usernameField.rac_textSignal subscribeNext:^(NSString *value) {
     	NSLog(@"Text field has been updated: %@", value);
     }];
+```
 
 这段代码中，我们声明输入框的文字变化时，将它的新值打印出来。无论何时输入框的信号发送了一个事件，这块代码都将被以新的文本内容为参数调用。
 
@@ -34,11 +36,13 @@ iOS App 中得输入框(Text Field)在输入文字发生改变时会产生的事
 
 信号很牛逼的地方在于它可以组合使用。我们可以过滤 *rac_textSignal* 返回的信号，以保证字符串的长度大于3才能登陆：
 
+``` objc
     [[self.textField.rac_textSignal filter:^BOOL(NSString *value) {
     	return [value length] >= 3;
     }] subscribeNext:^(NSString *value) {
     	NSLog(@"Text field has been updated: %@", value);
     }];
+```
 
 Filter 方法返回一个新的信号。当第一个信号发射了一个事件，这个事件的值将被传递到 *filter* 代码块。如果这块代发返回 YES，那么新的信号会发射一个事件。后代码订阅的就是这个 filter 返回的信号。
 
@@ -46,10 +50,12 @@ Filter 方法返回一个新的信号。当第一个信号发射了一个事件�
 
 我们来做一些更复杂的吧。我们将两个输入框的两个信号*联合 (combine)* 起来，将他们的值*降 (reduce)* 为一个布尔值，然后和另一个按钮的 *enable* 属性*绑定 (bind)* 在一起。
 
+``` objc
     [[RACSignal combineLatest:@[self.firstNameField.rac_textSignal, self.lastNameField.rac_textSignal]
     	reduce:^(NSString *firstName, NSString *lastName){
     		return @(firstName.length > 0 && lastName.length > 0);
     	}] setKeyPath:@"enabled" onObject:self.button];
+```
 
 按钮的 enable 状态总是由两个输入框的最新的信号所派生。这代表了函数响应式编程众多核心理念中的一个：派生状态(deriving state)。
 
