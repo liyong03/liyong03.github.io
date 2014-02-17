@@ -1,0 +1,62 @@
+---
+layout: post
+title: "iOS 的 ReactiveCocoa 函数式响应编程"
+date: 2014-02-17 23:33:11 +0800
+comments: true
+categories: ios, programming 
+---
+
+本文翻译自[这里](http://www.teehanlax.com/blog/reactivecocoa/)，其中一些语法由于 ReactiveCocoa 的演进我做了修改。
+
+Objective-C 是一种基于C语言、但又常常深陷于C的过时编程方式的编程语言。随着计算机计算能力的提升，编程语言设计也与时俱进，但是Objective-C有时好像留在了过去。
+
+Objective-C和C都属于计算机顺序执行软件指令的[指令式编程语言](http://en.wikipedia.org/wiki/Imperative_programming)，软件的行为也出自执行这些指令。如果开发者写出来正确顺序的指令，那么软件的行为也满足程序的期望。
+
+但是写出来的代码总是有缺陷，我们需要使用或是手动或是自动的测试去减少这些问题，但是如果能抽象单独的指令，而把注意力放在期望行为上面。这就是[声明式编程](http://en.wikipedia.org/wiki/Declarative_programming)的由来。
+
+指令范式强制让开发者写程序去完成一些任务，而声明范式解放开发者去描述任务是什么。
+
+[ReactiveCocoa](https://github.com/ReactiveCocoa/ReactiveCocoa)是一种让 Objective-C 少一些指令式属性，多一些响应式属性。它将*怎样*抽象成*什么*。
+
+下面我们用几个例子来展示 Objective-C 中的声明式编程是什么样的。
+
+ReactiveCocoa 的核心是*信号 (signal)* ，信号代表了不同时间发生的事件流。*订阅 (subscribing)* 信号允许开发者访问这些事件。下面开看一个基础的例子。
+
+iOS App 中得输入框(Text Field)在输入文字发生改变时会产生的事件会生成信号。ReactiveCocoa 的 UITextField 分类(Category)有一个方法：*rac_textSignal*，我们可以这样订阅这个事件：
+
+    [self.usernameField.rac_textSignal subscribeNext:^(NSString *value) {
+    	NSLog(@"Text field has been updated: %@", value);
+    }];
+
+这段代码中，我们声明输入框的文字变化时，将它的新值打印出来。无论何时输入框的信号发送了一个事件，这块代码都将被以新的文本内容为参数调用。
+
+![subscription](/images/frp_subscription.png)
+
+信号很牛逼的地方在于它可以组合使用。我们可以过滤 *rac_textSignal* 返回的信号，以保证字符串的长度大于3才能登陆：
+
+    [[self.textField.rac_textSignal filter:^BOOL(NSString *value) {
+    	return [value length] >= 3;
+    }] subscribeNext:^(NSString *value) {
+    	NSLog(@"Text field has been updated: %@", value);
+    }];
+
+Filter 方法返回一个新的信号。当第一个信号发射了一个事件，这个事件的值将被传递到 *filter* 代码块。如果这块代发返回 YES，那么新的信号会发射一个事件。后代码订阅的就是这个 filter 返回的信号。
+
+![filter](/images/frp_filter.png)
+
+我们来做一些更复杂的吧。我们将两个输入框的两个信号*联合 (combine)* 起来，将他们的值*降 (reduce)* 为一个布尔值，然后和另一个按钮的 *enable* 属性*绑定 (bind)* 在一起。
+
+    [[RACSignal combineLatest:@[self.firstNameField.rac_textSignal, self.lastNameField.rac_textSignal]
+    	reduce:^(NSString *firstName, NSString *lastName){
+    		return @(firstName.length > 0 && lastName.length > 0);
+    	}] setKeyPath:@"enabled" onObject:self.button];
+
+按钮的 enable 状态总是由两个输入框的最新的信号所派生。这代表了函数响应式编程众多核心理念中的一个：派生状态(deriving state)。
+
+![combine](/images/frp_combine.png)
+
+在上述所有例子中，我们都在 **viewDidLoad** 中有所声明，在应用运行时这些陈述都保持为真。这里我们没有实现任何代理方法(delegate methods)或者保存任何状态。所有行为都是显式声明而不是隐式的推断。
+
+函数响应式编程非常复杂，而学习 ReactiveCocoa 的丰富细节也需要时间。但是学习这些也会带来具有可预测的、良好定义行为的稳定程序。
+
+软件开发的历史告诉我们软件开发的趋势是朝着更高级别的抽象迈进，诚如我们现在再也不会和穿孔卡片或者汇编语言打交道一样。我相信函数响应式编程是抽象的另一个更高层次，借此程序员可以更快地开发出更好地软件。
