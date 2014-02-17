@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Yong的Blog]]></title>
-  <link href="http://liyong03.github.io/atom.xml" rel="self"/>
+  <title><![CDATA[Category: Programming | Yong的Blog]]></title>
+  <link href="http://liyong03.github.io/blog/categories/programming/atom.xml" rel="self"/>
   <link href="http://liyong03.github.io/"/>
   <updated>2014-02-17T23:35:25+08:00</updated>
   <id>http://liyong03.github.io/</id>
@@ -43,7 +43,7 @@
 
 <p>这段代码中，我们声明输入框的文字变化时，将它的新值打印出来。无论何时输入框的信号发送了一个事件，这块代码都将被以新的文本内容为参数调用。</p>
 
-<p><img src="http://liyong03.github.io/images/frp_subscription.png" alt="subscription" /></p>
+<p><img src="/images/frp_subscription.png" alt="subscription" /></p>
 
 <p>信号很牛逼的地方在于它可以组合使用。我们可以过滤 <em>rac_textSignal</em> 返回的信号，以保证字符串的长度大于3才能登陆：</p>
 
@@ -56,7 +56,7 @@
 
 <p>Filter 方法返回一个新的信号。当第一个信号发射了一个事件，这个事件的值将被传递到 <em>filter</em> 代码块。如果这块代发返回 YES，那么新的信号会发射一个事件。后代码订阅的就是这个 filter 返回的信号。</p>
 
-<p><img src="http://liyong03.github.io/images/frp_filter.png" alt="filter" /></p>
+<p><img src="/images/frp_filter.png" alt="filter" /></p>
 
 <p>我们来做一些更复杂的吧。我们将两个输入框的两个信号<em>联合 (combine)</em> 起来，将他们的值<em>降 (reduce)</em> 为一个布尔值，然后和另一个按钮的 <em>enable</em> 属性<em>绑定 (bind)</em> 在一起。</p>
 
@@ -68,69 +68,13 @@
 
 <p>按钮的 enable 状态总是由两个输入框的最新的信号所派生。这代表了函数响应式编程众多核心理念中的一个：派生状态(deriving state)。</p>
 
-<p><img src="http://liyong03.github.io/images/frp_combine.png" alt="combine" /></p>
+<p><img src="/images/frp_combine.png" alt="combine" /></p>
 
 <p>在上述所有例子中，我们都在 <strong>viewDidLoad</strong> 中有所声明，在应用运行时这些陈述都保持为真。这里我们没有实现任何代理方法(delegate methods)或者保存任何状态。所有行为都是显式声明而不是隐式的推断。</p>
 
 <p>函数响应式编程非常复杂，而学习 ReactiveCocoa 的丰富细节也需要时间。但是学习这些也会带来具有可预测的、良好定义行为的稳定程序。</p>
 
 <p>软件开发的历史告诉我们软件开发的趋势是朝着更高级别的抽象迈进，诚如我们现在再也不会和穿孔卡片或者汇编语言打交道一样。我相信函数响应式编程是抽象的另一个更高层次，借此程序员可以更快地开发出更好地软件。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[我的 2013]]></title>
-    <link href="http://liyong03.github.io/blog/2014/01/11/my-2013/"/>
-    <updated>2014-01-11T17:19:51+08:00</updated>
-    <id>http://liyong03.github.io/blog/2014/01/11/my-2013</id>
-    <content type="html"><![CDATA[<p>2013年飞逝而过！对我来说，这一年真如坐过山车，起起伏伏，<strong>人生如梦</strong>的感慨对我的2013来说最是贴切。这篇日志是对我的2013年的总结，也是对这神奇一年的备忘！</p>
-
-<h5>工作</h5>
-
-<p>2013年起伏的事情都发生在工作中。2012年成功发布 iPhone Flickr<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup> 后，13年前半段开始了新iPad项目，同时也维护已发布的App。下半年由于公司策略问题，将所有的移动项目拿回总部，我的项目也被拿了回去。我也被换到了新的项目。新的项目是Yahoo!主页推荐系统的后台，这对我来说是个新的挑战，从前端到后端，也捡起来了丢下好久的C++。</p>
-
-<p>工作中有个大的插曲，2013年前几个月一直在忙内部 Transfer，我全家做好了搬到湾区开始新生活的准备。不过由于临走前发生了一起让我躺枪、也让我震惊的事情，我的 Transfer 最终没有成行。这件事情让我重新思考了待人待事的态度方法，期间公司的做法和决定也让我下定决心离开Yahoo!.</p>
-
-<p>2013年后半段开始计划换工作，从准备到结束花了将近3个月，最终皇天不负有心人，我对结果非常满意。</p>
-
-<h5>技术</h5>
-
-<p>2013年我的技术积累还主要在iOS开发上面。项目重构重写让我重新审视了自己以前的设计和编码，发现弥补了很多不足。这一年我更加注重程序的设计和架构，我认为好的程序不应该能够工作就好了，还要有美感，要能重用、方便扩展。这一年我也更加关注后端的技术，从大规模服务器到大数据处理。好的软件工程师应该了解方方面面，并且有一两个精通的方向。</p>
-
-<h5>生活</h5>
-
-<p>2013年的生活被工作影响比较大。前面提到的内部Transfer没有成行，对我和我的家庭有很大影响，我们花了1个多月才让生活恢复正常。</p>
-
-<p>一年内我和老婆以及朋友完成了两趟比较长的自驾游。</p>
-
-<br>第一条线路是 北京->承德->塞罕坝->塔里湖->锡林郭勒->草原天路->张家口->北京。这一趟花了7天，把北京北边主要景区都走过了。唯一遗憾的是由于时间是秋天，所以草原的美景不如夏季那么好，不过也是别有一番风情。
-
-
-<br>第二条线路是 旧金山->Half moon bay->Moterey->Camel->洛杉矶->圣地亚哥->洛杉矶->旧金山，这一趟花了14天。和老婆一起在美国度过了圣诞节和新年，一路风景迷人、气候宜人。
-
-
-<p>对了，2013年健身的决心无比坚定，已经减肥接近8Kg！</p>
-
-<h5>2014希望</h5>
-
-<p>全家健康，一切顺顺利利，自己更加强大。</p>
-<div class="footnotes">
-<hr/>
-<ol>
-<li id="fn:1">
-<p>https://itunes.apple.com/hk/app/flickr/id328407587?mt=8<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
-</ol>
-</div>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Hello From Octopress]]></title>
-    <link href="http://liyong03.github.io/blog/2014/01/11/hello-from-octopress/"/>
-    <updated>2014-01-11T13:21:30+08:00</updated>
-    <id>http://liyong03.github.io/blog/2014/01/11/hello-from-octopress</id>
-    <content type="html"><![CDATA[<p>2014年决定在这里开始写blog，主要发布一些技术观察，技术总结和个人随想。</p>
 ]]></content>
   </entry>
   
