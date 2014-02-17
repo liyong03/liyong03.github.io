@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Programming | Yong的Blog]]></title>
   <link href="http://liyong03.github.io/blog/categories/programming/atom.xml" rel="self"/>
   <link href="http://liyong03.github.io/"/>
-  <updated>2014-02-17T23:35:25+08:00</updated>
+  <updated>2014-02-17T23:43:30+08:00</updated>
   <id>http://liyong03.github.io/</id>
   <author>
     <name><![CDATA[Yong Li]]></name>
@@ -36,16 +36,22 @@
 
 <p>iOS App 中得输入框(Text Field)在输入文字发生改变时会产生的事件会生成信号。ReactiveCocoa 的 UITextField 分类(Category)有一个方法：<em>rac_textSignal</em>，我们可以这样订阅这个事件：</p>
 
+<p>``` objc</p>
+
 <pre><code>[self.usernameField.rac_textSignal subscribeNext:^(NSString *value) {
     NSLog(@"Text field has been updated: %@", value);
 }];
 </code></pre>
+
+<p>```</p>
 
 <p>这段代码中，我们声明输入框的文字变化时，将它的新值打印出来。无论何时输入框的信号发送了一个事件，这块代码都将被以新的文本内容为参数调用。</p>
 
 <p><img src="/images/frp_subscription.png" alt="subscription" /></p>
 
 <p>信号很牛逼的地方在于它可以组合使用。我们可以过滤 <em>rac_textSignal</em> 返回的信号，以保证字符串的长度大于3才能登陆：</p>
+
+<p>``` objc</p>
 
 <pre><code>[[self.textField.rac_textSignal filter:^BOOL(NSString *value) {
     return [value length] &gt;= 3;
@@ -54,17 +60,23 @@
 }];
 </code></pre>
 
+<p>```</p>
+
 <p>Filter 方法返回一个新的信号。当第一个信号发射了一个事件，这个事件的值将被传递到 <em>filter</em> 代码块。如果这块代发返回 YES，那么新的信号会发射一个事件。后代码订阅的就是这个 filter 返回的信号。</p>
 
 <p><img src="/images/frp_filter.png" alt="filter" /></p>
 
 <p>我们来做一些更复杂的吧。我们将两个输入框的两个信号<em>联合 (combine)</em> 起来，将他们的值<em>降 (reduce)</em> 为一个布尔值，然后和另一个按钮的 <em>enable</em> 属性<em>绑定 (bind)</em> 在一起。</p>
 
+<p>``` objc</p>
+
 <pre><code>[[RACSignal combineLatest:@[self.firstNameField.rac_textSignal, self.lastNameField.rac_textSignal]
     reduce:^(NSString *firstName, NSString *lastName){
         return @(firstName.length &gt; 0 &amp;&amp; lastName.length &gt; 0);
     }] setKeyPath:@"enabled" onObject:self.button];
 </code></pre>
+
+<p>```</p>
 
 <p>按钮的 enable 状态总是由两个输入框的最新的信号所派生。这代表了函数响应式编程众多核心理念中的一个：派生状态(deriving state)。</p>
 
