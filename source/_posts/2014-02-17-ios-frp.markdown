@@ -3,7 +3,7 @@ layout: post
 title: "iOS 的 ReactiveCocoa 函数式响应编程"
 date: 2014-02-17 23:33:11 +0800
 comments: true
-categories: ios, programming 
+categories: ios programming 
 ---
 
 本文翻译自[这里](http://www.teehanlax.com/blog/reactivecocoa/)，其中一些语法由于 ReactiveCocoa 的演进我做了修改。
