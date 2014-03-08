@@ -1,24 +1,113 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Yong的Blog]]></title>
-  <link href="http://liyong03.github.io/atom.xml" rel="self"/>
-  <link href="http://liyong03.github.io/"/>
-  <updated>2014-03-09T00:19:08+08:00</updated>
-  <id>http://liyong03.github.io/</id>
-  <author>
-    <name><![CDATA[Yong Li]]></name>
-    
-  </author>
-  <generator uri="http://octopress.org/">Octopress</generator>
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>动手创建 NSObject - Yong的Blog</title>
+  <meta name="author" content="Yong Li">
 
   
-  <entry>
-    <title type="html"><![CDATA[动手创建 NSObject]]></title>
-    <link href="http://liyong03.github.io/blog/2014/03/09/lets-build-nsobject/"/>
-    <updated>2014-03-09T00:16:54+08:00</updated>
-    <id>http://liyong03.github.io/blog/2014/03/09/lets-build-nsobject</id>
-    <content type="html"><![CDATA[<p>本文译自<a href="https://www.mikeash.com/pyblog/friday-qa-2013-01-25-lets-build-nsobject.html">这里</a>，转载请注明！</p>
+  <meta name="description" content="本文译自这里，转载请注明！ 在 Cocoa 编程时创建和使用的（几乎）所有类都是以 NSObject 为根基，但它背后都做了什么、是怎么做的呢？今天，我将从零开始创建 NSObject。 根类(root class)的组成 准确地说，根类到底做了什么？以 Objective-C 自身的术语描述， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://liyong03.github.io/blog/2014/03/09/lets-build-nsobject">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Yong的Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-47130724-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Yong的Blog</a></h1>
+  
+    <h2>技术生活随想</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:liyong03.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">动手创建 NSObject</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-09T00:16:54+08:00" pubdate data-updated="true">Mar 9<span>th</span>, 2014</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://liyong03.github.io">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本文译自<a href="https://www.mikeash.com/pyblog/friday-qa-2013-01-25-lets-build-nsobject.html">这里</a>，转载请注明！</p>
 
 <p>在 Cocoa 编程时创建和使用的（几乎）所有类都是以 NSObject 为根基，但它背后都做了什么、是怎么做的呢？今天，我将从零开始创建 NSObject。</p>
 
@@ -648,143 +737,132 @@
 </ol>
 </div>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[iOS 的 ReactiveCocoa 函数式响应编程]]></title>
-    <link href="http://liyong03.github.io/blog/2014/02/17/ios-frp/"/>
-    <updated>2014-02-17T23:33:11+08:00</updated>
-    <id>http://liyong03.github.io/blog/2014/02/17/ios-frp</id>
-    <content type="html"><![CDATA[<p>本文翻译自<a href="http://www.teehanlax.com/blog/reactivecocoa/">这里</a>，其中一些语法由于 ReactiveCocoa 的演进我做了修改。</p>
-
-<p>Objective-C 是一种基于C语言、但又常常深陷于C的过时编程方式的编程语言。随着计算机计算能力的提升，编程语言设计也与时俱进，但是Objective-C有时好像留在了过去。</p>
-
-<p>Objective-C和C都属于计算机顺序执行软件指令的<a href="http://en.wikipedia.org/wiki/Imperative_programming">指令式编程语言</a>，软件的行为也出自执行这些指令。如果开发者写出来正确顺序的指令，那么软件的行为也满足程序的期望。</p>
-
-<p>但是写出来的代码总是有缺陷，我们需要使用或是手动或是自动的测试去减少这些问题，但是如果能抽象单独的指令，而把注意力放在期望行为上面。这就是<a href="http://en.wikipedia.org/wiki/Declarative_programming">声明式编程</a>的由来。</p>
-
-<p>指令范式强制让开发者写程序去完成一些任务，而声明范式解放开发者去描述任务是什么。</p>
-
-<p><a href="https://github.com/ReactiveCocoa/ReactiveCocoa">ReactiveCocoa</a>是一种让 Objective-C 少一些指令式属性，多一些响应式属性。它将<em>怎样</em>抽象成<em>什么</em>。</p>
-
-<p>下面我们用几个例子来展示 Objective-C 中的声明式编程是什么样的。</p>
-
-<p>ReactiveCocoa 的核心是<em>信号 (signal)</em> ，信号代表了不同时间发生的事件流。<em>订阅 (subscribing)</em> 信号允许开发者访问这些事件。下面开看一个基础的例子。</p>
-
-<p>iOS App 中得输入框(Text Field)在输入文字发生改变时会产生的事件会生成信号。ReactiveCocoa 的 UITextField 分类(Category)有一个方法：<em>rac_textSignal</em>，我们可以这样订阅这个事件：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">usernameField</span><span class="p">.</span><span class="n">rac_textSignal</span> <span class="nl">subscribeNext:</span><span class="o">^</span><span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="n">value</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;Text field has been updated: %@&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
-</span><span class='line'><span class="p">}];</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这段代码中，我们声明输入框的文字变化时，将它的新值打印出来。无论何时输入框的信号发送了一个事件，这块代码都将被以新的文本内容为参数调用。</p>
-
-<p><img src="http://liyong03.github.io/images/frp_subscription.png" alt="subscription" /></p>
-
-<p>信号很牛逼的地方在于它可以组合使用。我们可以过滤 <em>rac_textSignal</em> 返回的信号，以保证字符串的长度大于3才能登陆：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="p">[[</span><span class="n">self</span><span class="p">.</span><span class="n">textField</span><span class="p">.</span><span class="n">rac_textSignal</span> <span class="nl">filter:</span><span class="o">^</span><span class="kt">BOOL</span><span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="n">value</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="p">[</span><span class="n">value</span> <span class="n">length</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">;</span>
-</span><span class='line'><span class="p">}]</span> <span class="nl">subscribeNext:</span><span class="o">^</span><span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="n">value</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;Text field has been updated: %@&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
-</span><span class='line'><span class="p">}];</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Filter 方法返回一个新的信号。当第一个信号发射了一个事件，这个事件的值将被传递到 <em>filter</em> 代码块。如果这块代发返回 YES，那么新的信号会发射一个事件。后代码订阅的就是这个 filter 返回的信号。</p>
-
-<p><img src="http://liyong03.github.io/images/frp_filter.png" alt="filter" /></p>
-
-<p>我们来做一些更复杂的吧。我们将两个输入框的两个信号<em>联合 (combine)</em> 起来，将他们的值<em>降 (reduce)</em> 为一个布尔值，然后和另一个按钮的 <em>enable</em> 属性<em>绑定 (bind)</em> 在一起。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="p">[[</span><span class="n">RACSignal</span> <span class="nl">combineLatest:</span><span class="err">@</span><span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">firstNameField</span><span class="p">.</span><span class="n">rac_textSignal</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">lastNameField</span><span class="p">.</span><span class="n">rac_textSignal</span><span class="p">]</span>
-</span><span class='line'>  <span class="nl">reduce:</span><span class="o">^</span><span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="n">firstName</span><span class="p">,</span> <span class="n">NSString</span> <span class="o">*</span><span class="n">lastName</span><span class="p">){</span>
-</span><span class='line'>      <span class="k">return</span> <span class="err">@</span><span class="p">(</span><span class="n">firstName</span><span class="p">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">lastName</span><span class="p">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">}]</span> <span class="nl">setKeyPath:</span><span class="s">@&quot;enabled&quot;</span> <span class="nl">onObject:</span><span class="n">self</span><span class="p">.</span><span class="n">button</span><span class="p">];</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>按钮的 enable 状态总是由两个输入框的最新的信号所派生。这代表了函数响应式编程众多核心理念中的一个：派生状态(deriving state)。</p>
-
-<p><img src="http://liyong03.github.io/images/frp_combine.png" alt="combine" /></p>
-
-<p>在上述所有例子中，我们都在 <strong>viewDidLoad</strong> 中有所声明，在应用运行时这些陈述都保持为真。这里我们没有实现任何代理方法(delegate methods)或者保存任何状态。所有行为都是显式声明而不是隐式的推断。</p>
-
-<p>函数响应式编程非常复杂，而学习 ReactiveCocoa 的丰富细节也需要时间。但是学习这些也会带来具有可预测的、良好定义行为的稳定程序。</p>
-
-<p>软件开发的历史告诉我们软件开发的趋势是朝着更高级别的抽象迈进，诚如我们现在再也不会和穿孔卡片或者汇编语言打交道一样。我相信函数响应式编程是抽象的另一个更高层次，借此程序员可以更快地开发出更好地软件。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[我的 2013]]></title>
-    <link href="http://liyong03.github.io/blog/2014/01/11/my-2013/"/>
-    <updated>2014-01-11T17:19:51+08:00</updated>
-    <id>http://liyong03.github.io/blog/2014/01/11/my-2013</id>
-    <content type="html"><![CDATA[<p>2013年飞逝而过！对我来说，这一年真如坐过山车，起起伏伏，<strong>人生如梦</strong>的感慨对我的2013来说最是贴切。这篇日志是对我的2013年的总结，也是对这神奇一年的备忘！</p>
-
-<h5>工作</h5>
-
-<p>2013年起伏的事情都发生在工作中。2012年成功发布 iPhone Flickr<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup> 后，13年前半段开始了新iPad项目，同时也维护已发布的App。下半年由于公司策略问题，将所有的移动项目拿回总部，我的项目也被拿了回去。我也被换到了新的项目。新的项目是Yahoo!主页推荐系统的后台，这对我来说是个新的挑战，从前端到后端，也捡起来了丢下好久的C++。</p>
-
-<p>工作中有个大的插曲，2013年前几个月一直在忙内部 Transfer，我全家做好了搬到湾区开始新生活的准备。不过由于临走前发生了一起让我躺枪、也让我震惊的事情，我的 Transfer 最终没有成行。这件事情让我重新思考了待人待事的态度方法，期间公司的做法和决定也让我下定决心离开Yahoo!.</p>
-
-<p>2013年后半段开始计划换工作，从准备到结束花了将近3个月，最终皇天不负有心人，我对结果非常满意。</p>
-
-<h5>技术</h5>
-
-<p>2013年我的技术积累还主要在iOS开发上面。项目重构重写让我重新审视了自己以前的设计和编码，发现弥补了很多不足。这一年我更加注重程序的设计和架构，我认为好的程序不应该能够工作就好了，还要有美感，要能重用、方便扩展。这一年我也更加关注后端的技术，从大规模服务器到大数据处理。好的软件工程师应该了解方方面面，并且有一两个精通的方向。</p>
-
-<h5>生活</h5>
-
-<p>2013年的生活被工作影响比较大。前面提到的内部Transfer没有成行，对我和我的家庭有很大影响，我们花了1个多月才让生活恢复正常。</p>
-
-<p>一年内我和老婆以及朋友完成了两趟比较长的自驾游。</p>
-
-<br>第一条线路是 北京->承德->塞罕坝->塔里湖->锡林郭勒->草原天路->张家口->北京。这一趟花了7天，把北京北边主要景区都走过了。唯一遗憾的是由于时间是秋天，所以草原的美景不如夏季那么好，不过也是别有一番风情。
-
-
-<br>第二条线路是 旧金山->Half moon bay->Moterey->Camel->洛杉矶->圣地亚哥->洛杉矶->旧金山，这一趟花了14天。和老婆一起在美国度过了圣诞节和新年，一路风景迷人、气候宜人。
-
-
-<p>对了，2013年健身的决心无比坚定，已经减肥接近8Kg！</p>
-
-<h5>2014希望</h5>
-
-<p>全家健康，一切顺顺利利，自己更加强大。</p>
-<div class="footnotes">
-<hr/>
-<ol>
-<li id="fn:1">
-<p>https://itunes.apple.com/hk/app/flickr/id328407587?mt=8<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
-</ol>
 </div>
 
-]]></content>
-  </entry>
+
+  <footer>
+    <p class="meta">
+      
   
-  <entry>
-    <title type="html"><![CDATA[Hello From Octopress]]></title>
-    <link href="http://liyong03.github.io/blog/2014/01/11/hello-from-octopress/"/>
-    <updated>2014-01-11T13:21:30+08:00</updated>
-    <id>http://liyong03.github.io/blog/2014/01/11/hello-from-octopress</id>
-    <content type="html"><![CDATA[<p>2014年决定在这里开始写blog，主要发布一些技术观察，技术总结和个人随想。</p>
-]]></content>
-  </entry>
+
+<span class="byline author vcard">Posted by <span class="fn">Yong Li</span></span>
+
+      
+
+
+
+
+
+
+
+
   
-</feed>
+
+
+<time datetime="2014-03-09T00:16:54+08:00" pubdate data-updated="true">Mar 9<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ios/'>ios</a>, <a class='category' href='/blog/categories/programming/'>programming</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/02/17/ios-frp/" title="Previous Post: iOS 的 ReactiveCocoa 函数式响应编程">&laquo; iOS 的 ReactiveCocoa 函数式响应编程</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/03/09/lets-build-nsobject/">动手创建 NSObject</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/17/ios-frp/">iOS 的 ReactiveCocoa 函数式响应编程</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/01/11/my-2013/">我的 2013</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/01/11/hello-from-octopress/">Hello From Octopress</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Yong Li -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'liyong03';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://liyong03.github.io/blog/2014/03/09/lets-build-nsobject/';
+        var disqus_url = 'http://liyong03.github.io/blog/2014/03/09/lets-build-nsobject/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
