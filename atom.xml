@@ -4,7 +4,7 @@
   <title><![CDATA[Yong的Blog]]></title>
   <link href="http://liyong03.github.io/atom.xml" rel="self"/>
   <link href="http://liyong03.github.io/"/>
-  <updated>2014-03-09T00:19:08+08:00</updated>
+  <updated>2014-03-09T18:57:26+08:00</updated>
   <id>http://liyong03.github.io/</id>
   <author>
     <name><![CDATA[Yong Li]]></name>
@@ -685,7 +685,7 @@
 
 <p>这段代码中，我们声明输入框的文字变化时，将它的新值打印出来。无论何时输入框的信号发送了一个事件，这块代码都将被以新的文本内容为参数调用。</p>
 
-<p><img src="http://liyong03.github.io/images/frp_subscription.png" alt="subscription" /></p>
+<p><img src="http://liyong03.github.io/images/subscription.png" alt="subscription" /></p>
 
 <p>信号很牛逼的地方在于它可以组合使用。我们可以过滤 <em>rac_textSignal</em> 返回的信号，以保证字符串的长度大于3才能登陆：</p>
 
@@ -704,7 +704,7 @@
 
 <p>Filter 方法返回一个新的信号。当第一个信号发射了一个事件，这个事件的值将被传递到 <em>filter</em> 代码块。如果这块代发返回 YES，那么新的信号会发射一个事件。后代码订阅的就是这个 filter 返回的信号。</p>
 
-<p><img src="http://liyong03.github.io/images/frp_filter.png" alt="filter" /></p>
+<p><img src="http://liyong03.github.io/images/filter.png" alt="filter" /></p>
 
 <p>我们来做一些更复杂的吧。我们将两个输入框的两个信号<em>联合 (combine)</em> 起来，将他们的值<em>降 (reduce)</em> 为一个布尔值，然后和另一个按钮的 <em>enable</em> 属性<em>绑定 (bind)</em> 在一起。</p>
 
@@ -721,7 +721,7 @@
 
 <p>按钮的 enable 状态总是由两个输入框的最新的信号所派生。这代表了函数响应式编程众多核心理念中的一个：派生状态(deriving state)。</p>
 
-<p><img src="http://liyong03.github.io/images/frp_combine.png" alt="combine" /></p>
+<p><img src="http://liyong03.github.io/images/combine.png" alt="combine" /></p>
 
 <p>在上述所有例子中，我们都在 <strong>viewDidLoad</strong> 中有所声明，在应用运行时这些陈述都保持为真。这里我们没有实现任何代理方法(delegate methods)或者保存任何状态。所有行为都是显式声明而不是隐式的推断。</p>
 
