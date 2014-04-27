@@ -9,7 +9,7 @@
   <meta name="author" content="Yong Li">
 
   
-  <meta name="description" content="本文译自这里. iOS App 性能备忘 本备忘收集了很多可以提高 iOS 中 Objective-C 代码性能的代码片段和配置 这些文档中大部分代码片段和配置包括：将平时随手使用会用到的优先考虑灵活性而不是性能的高级 API，替换为功能相同的底层 API；一些会影响到绘制性能的类属性配置。对于 &hellip;">
+  <meta name="description" content="本文译自这里. 本备忘收集了很多可以提高 iOS 中 Objective-C 代码性能的代码片段和配置 这些文档中大部分代码片段和配置包括：将平时随手使用会用到的优先考虑灵活性而不是性能的高级 API，替换为功能相同的底层 API；一些会影响到绘制性能的类属性配置。对于 app 性能来说， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -112,8 +112,6 @@
 
   <div class="entry-content"><p>本文译自<a href="https://github.com/danielamitay/iOS-App-Performance-Cheatsheet">这里</a>.</p>
 
-<h1>iOS App 性能备忘</h1>
-
 <p><strong>本备忘收集了很多可以提高 iOS 中 Objective-C 代码性能的代码片段和配置</strong></p>
 
 <p>这些文档中大部分代码片段和配置包括：将平时随手使用会用到的优先考虑灵活性而不是性能的高级 API，替换为功能相同的底层 API；一些会影响到绘制性能的类属性配置。对于 app 性能来说，好的架构和恰当的多线程总是很重要的，但是有时需要具体问题具体对待。</p>
@@ -123,32 +121,7 @@
 <p><strong>iOS App 性能备忘</strong> 按照 Objective-C framework 组织为不同章节的 Markdown 文件：</p>
 
 <ul>
-<li><a href="Foundation.md"><strong>Foundation</strong></a>
-
-<ul>
-<li><a href="Foundation.md#nsdateformatter">NSDateFormatter</a></li>
-<li><a href="Foundation.md#nsfilemanager">NSFileManager</a></li>
-<li><a href="Foundation.md#nsobjcruntime">NSObjCRuntime</a></li>
-<li><a href="Foundation.md#nsstring">NSString</a></li>
-</ul>
-</li>
-<li><a href="UIKit.md"><strong>UIKit</strong></a>
-
-<ul>
-<li><a href="UIKit.md#uiimage">UIImage</a></li>
-<li><a href="UIKit.md#uiview">UIView</a></li>
-</ul>
-</li>
-<li><a href="QuartzCore.md"><strong>QuartzCore</strong></a>
-
-<ul>
-<li><a href="QuartzCore.md#calayer">CALayer</a></li>
-</ul>
-</li>
-</ul>
-
-
-<h1>Foundation</h1>
+<li><a href="#Foundation"><strong>Foundation</strong></a>
 
 <ul>
 <li><a href="#nsdateformatter">NSDateFormatter</a></li>
@@ -156,7 +129,24 @@
 <li><a href="#nsobjcruntime">NSObjCRuntime</a></li>
 <li><a href="#nsstring">NSString</a></li>
 </ul>
+</li>
+<li><a href="#UIKit"><strong>UIKit</strong></a>
 
+<ul>
+<li><a href="#uiimage">UIImage</a></li>
+<li><a href="#uiview">UIView</a></li>
+</ul>
+</li>
+<li><a href="#QuartzCore"><strong>QuartzCore</strong></a>
+
+<ul>
+<li><a href="#calayer">CALayer</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h1>Foundation</h1>
 
 <hr />
 
@@ -342,12 +332,6 @@
 
 <h1>UIKit</h1>
 
-<ul>
-<li><a href="#uiimage">UIImage</a></li>
-<li><a href="#uiview">UIView</a></li>
-</ul>
-
-
 <hr />
 
 <h3>UIImage</h3>
@@ -379,11 +363,6 @@
 <p>当设置一个 <code>UIView</code> 的 frame 属性时，应该保证坐标值和像素位置对齐，否则将会触发反锯齿降低性能，也有可能引起图形界面的边界模糊（译者注：尤其是涉及到绘制文字时将会引起文字模糊不清，非 retina 设备特别明显）。一种简单直接的办法就是使用 <code>CGRectIntegral()</code> 自动将 <code>CGRect</code> 的值四舍五入到整数。对于像素密度大于1的设备，可以将坐标值近似为 <code>1.0f / screen.scale</code> 整数倍。</p>
 
 <h1>QuartzCore</h1>
-
-<ul>
-<li><a href="#calayer">CALayer</a></li>
-</ul>
-
 
 <hr />
 
