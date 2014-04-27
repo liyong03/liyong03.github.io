@@ -1,0 +1,571 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>iOS App 性能备忘 - Yong的Blog</title>
+  <meta name="author" content="Yong Li">
+
+  
+  <meta name="description" content="本文译自这里. iOS App 性能备忘 本备忘收集了很多可以提高 iOS 中 Objective-C 代码性能的代码片段和配置 这些文档中大部分代码片段和配置包括：将平时随手使用会用到的优先考虑灵活性而不是性能的高级 API，替换为功能相同的底层 API；一些会影响到绘制性能的类属性配置。对于 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://liyong03.github.io/blog/2014/04/27/ios-performance">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Yong的Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-47130724-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Yong的Blog</a></h1>
+  
+    <h2>技术生活随想</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:liyong03.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">iOS App 性能备忘</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-27T11:04:22+08:00" pubdate data-updated="true">Apr 27<span>th</span>, 2014</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://liyong03.github.io">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本文译自<a href="https://github.com/danielamitay/iOS-App-Performance-Cheatsheet">这里</a>.</p>
+
+<h1>iOS App 性能备忘</h1>
+
+<p><strong>本备忘收集了很多可以提高 iOS 中 Objective-C 代码性能的代码片段和配置</strong></p>
+
+<p>这些文档中大部分代码片段和配置包括：将平时随手使用会用到的优先考虑灵活性而不是性能的高级 API，替换为功能相同的底层 API；一些会影响到绘制性能的类属性配置。对于 app 性能来说，好的架构和恰当的多线程总是很重要的，但是有时需要具体问题具体对待。</p>
+
+<h3>目录</h3>
+
+<p><strong>iOS App 性能备忘</strong> 按照 Objective-C framework 组织为不同章节的 Markdown 文件：</p>
+
+<ul>
+<li><a href="Foundation.md"><strong>Foundation</strong></a>
+
+<ul>
+<li><a href="Foundation.md#nsdateformatter">NSDateFormatter</a></li>
+<li><a href="Foundation.md#nsfilemanager">NSFileManager</a></li>
+<li><a href="Foundation.md#nsobjcruntime">NSObjCRuntime</a></li>
+<li><a href="Foundation.md#nsstring">NSString</a></li>
+</ul>
+</li>
+<li><a href="UIKit.md"><strong>UIKit</strong></a>
+
+<ul>
+<li><a href="UIKit.md#uiimage">UIImage</a></li>
+<li><a href="UIKit.md#uiview">UIView</a></li>
+</ul>
+</li>
+<li><a href="QuartzCore.md"><strong>QuartzCore</strong></a>
+
+<ul>
+<li><a href="QuartzCore.md#calayer">CALayer</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h1>Foundation</h1>
+
+<ul>
+<li><a href="#nsdateformatter">NSDateFormatter</a></li>
+<li><a href="#nsfilemanager">NSFileManager</a></li>
+<li><a href="#nsobjcruntime">NSObjCRuntime</a></li>
+<li><a href="#nsstring">NSString</a></li>
+</ul>
+
+
+<hr />
+
+<h3>NSDateFormatter</h3>
+
+<p><code>NSDateFormatter</code> 不是唯一一个创建的开销就很昂贵的类，但是它却是常用的、开销大到 Apple 会特别建议应该缓存和重复使用实例的一个。</p>
+
+<blockquote><p>Creating a date formatter is not a cheap operation. If you are likely to use a formatter frequently, it is typically more efficient to cache a single instance than to create and dispose of multiple instances. One approach is to use a static variable.</p></blockquote>
+
+<p><a href="https://developer.apple.com/library/ios/documentation/cocoa/Conceptual/DataFormatting/Articles/dfDateFormatting10_4.html">Source</a></p>
+
+<p>一种通用的缓存 <code>NSDateFormatter</code> 的方法是使用 <code>-[NSThread threadDictionary]</code>（因为 <code>NSDateFormatter</code> 不是线程安全的）：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='objective-c'><span class='line'><span class="k">+</span> <span class="p">(</span><span class="n">NSDateFormatter</span> <span class="o">*</span><span class="p">)</span><span class="nf">cachedDateFormatter</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">NSMutableDictionary</span> <span class="o">*</span><span class="n">threadDictionary</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NSThread</span> <span class="n">currentThread</span><span class="p">]</span> <span class="n">threadDictionary</span><span class="p">];</span>
+</span><span class='line'>  <span class="n">NSDateFormatter</span> <span class="o">*</span><span class="n">dateFormatter</span> <span class="o">=</span> <span class="p">[</span><span class="n">threadDictionary</span> <span class="nl">objectForKey:</span><span class="s">@&quot;cachedDateFormatter&quot;</span><span class="p">];</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">dateFormatter</span> <span class="o">==</span> <span class="nb">nil</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">dateFormatter</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NSDateFormatter</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+</span><span class='line'>        <span class="p">[</span><span class="n">dateFormatter</span> <span class="nl">setLocale:</span><span class="p">[</span><span class="n">NSLocale</span> <span class="n">currentLocale</span><span class="p">]];</span>
+</span><span class='line'>        <span class="p">[</span><span class="n">dateFormatter</span> <span class="nl">setDateFormat:</span> <span class="s">@&quot;YYYY-MM-dd HH:mm:ss&quot;</span><span class="p">];</span>
+</span><span class='line'>        <span class="p">[</span><span class="n">threadDictionary</span> <span class="nl">setObject:</span><span class="n">dateFormatter</span> <span class="nl">forKey:</span><span class="s">@&quot;cachedDateFormatter&quot;</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">dateFormatter</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>&ndash; (NSDate <em>)dateFromString:(NSString </em>)string</h5>
+
+<p>这可能是最常见的 iOS 性能瓶颈。经过多方努力寻找，下面是 <a href="http://en.wikipedia.org/wiki/ISO_8601">ISO8601</a> 转成 <code>NSDate</code> 的 <code>NSDateFormatter</code> 的最著名替代品。</p>
+
+<h6>strptime</h6>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='objective-c'><span class='line'><span class="c1">//#include &lt;time.h&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">time_t</span> <span class="n">t</span><span class="p">;</span>
+</span><span class='line'><span class="k">struct</span> <span class="n">tm</span> <span class="n">tm</span><span class="p">;</span>
+</span><span class='line'><span class="n">strptime</span><span class="p">([</span><span class="n">iso8601String</span> <span class="nl">cStringUsingEncoding:</span><span class="n">NSUTF8StringEncoding</span><span class="p">],</span> <span class="s">&quot;%Y-%m-%dT%H:%M:%S%z&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tm</span><span class="p">);</span>
+</span><span class='line'><span class="n">tm</span><span class="p">.</span><span class="n">tm_isdst</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'><span class="n">t</span> <span class="o">=</span> <span class="n">mktime</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tm</span><span class="p">);</span>
+</span><span class='line'><span class="p">[</span><span class="n">NSDate</span> <span class="nl">dateWithTimeIntervalSince1970:</span><span class="n">t</span> <span class="o">+</span> <span class="p">[[</span><span class="n">NSTimeZone</span> <span class="n">localTimeZone</span><span class="p">]</span> <span class="n">secondsFromGMT</span><span class="p">]];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://sam.roon.io/how-to-drastically-improve-your-app-with-an-afternoon-and-instruments">Source</a></p>
+
+<h6>sqlite3</h6>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='objective-c'><span class='line'><span class="c1">//#import &quot;sqlite3.h&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">sqlite3</span> <span class="o">*</span><span class="n">db</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'><span class="n">sqlite3_open</span><span class="p">(</span><span class="s">&quot;:memory:&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">db</span><span class="p">);</span>
+</span><span class='line'><span class="n">sqlite3_stmt</span> <span class="o">*</span><span class="n">statement</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'><span class="n">sqlite3_prepare_v2</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="s">&quot;SELECT strftime(&#39;%s&#39;, ?);&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">statement</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span><span class='line'><span class="n">sqlite3_bind_text</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">iso8601String</span> <span class="n">UTF8String</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">SQLITE_STATIC</span><span class="p">);</span>
+</span><span class='line'><span class="n">sqlite3_step</span><span class="p">(</span><span class="n">statement</span><span class="p">);</span>
+</span><span class='line'><span class="n">int64_t</span> <span class="n">value</span> <span class="o">=</span> <span class="n">sqlite3_column_int64</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span><span class='line'><span class="n">NSDate</span> <span class="o">*</span><span class="n">date</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSDate</span> <span class="nl">dateWithTimeIntervalSince1970:</span><span class="n">value</span><span class="p">];</span>
+</span><span class='line'><span class="n">sqlite3_clear_bindings</span><span class="p">(</span><span class="n">statement</span><span class="p">);</span>
+</span><span class='line'><span class="n">sqlite3_reset</span><span class="p">(</span><span class="n">statement</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://vombat.tumblr.com/post/60530544401/date-parsing-performance-on-ios-nsdateformatter-vs">Source</a></p>
+
+<h3>NSFileManager</h3>
+
+<h5>&ndash; (NSDictionary <em>)attributesOfItemAtPath:(NSString </em>)filePath error:(NSError *)error</h5>
+
+<p>当试图获取磁盘中一个文件的属性信息时，使用 <code>–[NSFileManager attributesOfItemAtPath:error:]</code> 会浪费大量时间读取你可能根本不需要的附加属性。这时你可以使用 <code>stat</code> 代替 <code>NSFileManager</code>，直接获取文件属性：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='objective-c'><span class='line'><span class="c1">//#import &lt;sys/stat.h&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">struct</span> <span class="n">stat</span> <span class="n">statbuf</span><span class="p">;</span>
+</span><span class='line'><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">cpath</span> <span class="o">=</span> <span class="p">[</span><span class="n">filePath</span> <span class="n">fileSystemRepresentation</span><span class="p">];</span>
+</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="n">cpath</span> <span class="o">&amp;&amp;</span> <span class="n">stat</span><span class="p">(</span><span class="n">cpath</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">statbuf</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">NSNumber</span> <span class="o">*</span><span class="n">fileSize</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nl">numberWithUnsignedLongLong:</span><span class="n">statbuf</span><span class="p">.</span><span class="n">st_size</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">NSDate</span> <span class="o">*</span><span class="n">modificationDate</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSDate</span> <span class="nl">dateWithTimeIntervalSince1970:</span><span class="n">statbuf</span><span class="p">.</span><span class="n">st_mtime</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">NSDate</span> <span class="o">*</span><span class="n">creationDate</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSDate</span> <span class="nl">dateWithTimeIntervalSince1970:</span><span class="n">statbuf</span><span class="p">.</span><span class="n">st_ctime</span><span class="p">];</span>
+</span><span class='line'>    <span class="c1">// etc</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>NSObjCRuntime</h3>
+
+<h5>NSLog(NSString *format, &hellip;)</h5>
+
+<p><code>NSLog()</code> 写消息到 Apple 的系统日志。当通过 Xcode 变异运行程序时，被写出的日志会展现在调试终端，同事也会写到设备产品终端日志中。此外，系统会在主线程序列化 <code>NSLog()</code> 的内容。即使是最新的 iOS 设备，<code>NSLog()</code> 输出调试信息所花的时间也是无法忽略的。所以在产品环境中推荐尽可能少的使用 <code>NSLog()</code>。</p>
+
+<blockquote><p>Calling <code>NSLog</code> makes a new calendar for each line logged. Avoid calling <code>NSLog</code> excessively.</p></blockquote>
+
+<p><a href="https://developer.apple.com/videos/wwdc/2012/?id=235">Source</a></p>
+
+<p>下面是通常会用到的宏定义，它会根据 debug/production 来选择执行 <code>NSLog()</code>：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='objective-c'><span class='line'><span class="cp">#ifdef DEBUG</span>
+</span><span class='line'><span class="c1">// Only log when attached to the debugger</span>
+</span><span class='line'><span class="cp">#    define DLog(...) NSLog(__VA_ARGS__)</span>
+</span><span class='line'><span class="cp">#else</span>
+</span><span class='line'><span class="cp">#    define DLog(...) </span><span class="cm">/* */</span><span class="cp"></span>
+</span><span class='line'><span class="cp">#endif</span>
+</span><span class='line'><span class="c1">// Always log, even in production</span>
+</span><span class='line'><span class="cp">#define ALog(...) NSLog(__VA_ARGS__)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://iphoneincubator.com/blog/debugging/the-evolution-of-a-replacement-for-nslog">Source</a></p>
+
+<h3>NSString</h3>
+
+<h5>+ (instancetype)stringWithFormat:(NSString *)format,, &hellip;</h5>
+
+<p>创建 <code>NSString</code> 不是特别昂贵，但是当在紧凑循环（比如作为字典的键值）中使用时， <code>+[NSString stringWithFormat:]</code> 的性能可以通过使用类似 <code>asprintf</code> 的 C 函数显著提高。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='objective-c'><span class='line'><span class="n">NSString</span> <span class="o">*</span><span class="n">firstName</span> <span class="o">=</span> <span class="s">@&quot;Daniel&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="n">NSString</span> <span class="o">*</span><span class="n">lastName</span> <span class="o">=</span> <span class="s">@&quot;Amitay&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="o">*</span><span class="n">buffer</span><span class="p">;</span>
+</span><span class='line'><span class="n">asprintf</span><span class="p">(</span><span class="o">&amp;</span><span class="n">buffer</span><span class="p">,</span> <span class="s">&quot;Full name: %s %s&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">firstName</span> <span class="n">UTF8String</span><span class="p">],</span> <span class="p">[</span><span class="n">lastName</span> <span class="n">UTF8String</span><span class="p">]);</span>
+</span><span class='line'><span class="n">NSString</span> <span class="o">*</span><span class="n">fullName</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSString</span> <span class="nl">stringWithCString:</span><span class="n">buffer</span> <span class="nl">encoding:</span><span class="n">NSUTF8StringEncoding</span><span class="p">];</span>
+</span><span class='line'><span class="n">free</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>&ndash; (instancetype)initWithFormat:(NSString *)format, &hellip;</h5>
+
+<p>参考 <a href="#-instancetypestringwithformatnsstring-format-"><code>+[NSString stringWithFormat:]</code></a></p>
+
+<h1>UIKit</h1>
+
+<ul>
+<li><a href="#uiimage">UIImage</a></li>
+<li><a href="#uiview">UIView</a></li>
+</ul>
+
+
+<hr />
+
+<h3>UIImage</h3>
+
+<h5>+ (UIImage <em>)imageNamed:(NSString </em>)fileName</h5>
+
+<p>如果 boundle 中得某个图片只显示一次，推荐使用 <code>+ (UIImage *)imageWithContentsOfFile:(NSString *)path</code>，系统就不会缓存该图片。参考 Apple 的文档：</p>
+
+<blockquote><p>If you have an image file that will only be displayed once and wish to ensure that it does not get added to the system’s cache, you should instead create your image using imageWithContentsOfFile:. This will keep your single-use image out of the system image cache, potentially improving the memory use characteristics of your app.</p></blockquote>
+
+<p><a href="https://developer.apple.com/library/ios/documentation/uikit/reference/UIImage_Class/Reference/Reference.html#//apple_ref/occ/clm/UIImage/imageNamed:">Source</a></p>
+
+<h3>UIView</h3>
+
+<h5>@property(nonatomic) BOOL clearsContextBeforeDrawing</h5>
+
+<p>将 <code>UIView</code> 的属性 <code>clearsContextBeforeDrawing</code> 设置为 <code>NO</code> 在多数情况下可以提高绘制性能，尤其是在你自己用绘制代码实现了一个定制 view 的时候。</p>
+
+<blockquote><p>If you set the value of this property to NO, you are responsible for ensuring the contents of the view are drawn properly in your drawRect: method. If your drawing code is already heavily optimized, setting this property is NO can improve performance, especially during scrolling when only a portion of the view might need to be redrawn.</p></blockquote>
+
+<p><a href="https://developer.apple.com/library/ios/documentation/uikit/reference/uiview_class/uiview/uiview.html#//apple_ref/occ/instp/UIView/clearsContextBeforeDrawing">Source</a></p>
+
+<blockquote><p>By default, UIKit clears a view’s current context buffer prior to calling its drawRect: method to update that same area. If you are responding to scrolling events in your view, clearing this region repeatedly during scrolling updates can be expensive. To disable the behavior, you can change the value in the clearsContextBeforeDrawing property to NO.</p></blockquote>
+
+<p><a href="https://developer.apple.com/library/ios/documentation/2ddrawing/conceptual/drawingprintingios/DrawingTips/DrawingTips.html">Source</a></p>
+
+<h5>@property(nonatomic) CGRect frame</h5>
+
+<p>当设置一个 <code>UIView</code> 的 frame 属性时，应该保证坐标值和像素位置对齐，否则将会触发反锯齿降低性能，也有可能引起图形界面的边界模糊（译者注：尤其是涉及到绘制文字时将会引起文字模糊不清，非 retina 设备特别明显）。一种简单直接的办法就是使用 <code>CGRectIntegral()</code> 自动将 <code>CGRect</code> 的值四舍五入到整数。对于像素密度大于1的设备，可以将坐标值近似为 <code>1.0f / screen.scale</code> 整数倍。</p>
+
+<h1>QuartzCore</h1>
+
+<ul>
+<li><a href="#calayer">CALayer</a></li>
+</ul>
+
+
+<hr />
+
+<h3>CALayer</h3>
+
+<h5>@property BOOL allowsGroupOpacity</h5>
+
+<p>在 iOS7 中，这个属性表示 layer 的 sublayer 是否继承父 layer 的透明度，主要用途是当在动画中改变一个 layer 的透明度时（会引起子 view 的透明度显示出来）。但是如果你不需要这种绘制类型，可以关闭这个属性来提高性能。</p>
+
+<blockquote><p>When true, and the layer&rsquo;s opacity property is less than one, the layer is allowed to composite itself as a group separate from its parent. This gives the correct results when the layer contains multiple opaque components, but may reduce performance.</p>
+
+<p>The default value of the property is read from the boolean UIViewGroupOpacity property in the main bundle&rsquo;s Info.plist. If no value is found in the Info.plist the default value is YES for applications linked against the iOS 7 SDK or later and NO for applications linked against an earlier SDK.</p></blockquote>
+
+<p>上述引用来源已不存在，可以参考 <code>CALayer.h</code>。</p>
+
+<blockquote><p>(Default on iOS 7 and later) Inherit the opacity of the superlayer. This option allows for more sophisticated rendering in the simulator but can have a noticeable impact on performance.</p></blockquote>
+
+<p><a href="https://developer.apple.com/library/ios/documentation/general/Reference/InfoPlistKeyReference/Articles/iPhoneOSKeys.html#//apple_ref/doc/uid/TP40009252-SW6">Source</a></p>
+
+<h5>@property BOOL drawsAsynchronously</h5>
+
+<p><code>drawsAsynchronously</code> 属性会导致 layer 的 <code>CGContext</code> 延迟到后台线程绘制。这个属性对于频繁绘制的 leyer 有很大的好处。</p>
+
+<blockquote><p>When this property is set to YES, the graphics context used to draw the layer’s contents queues drawing commands and executes them on a background thread rather than executing them synchronously. Performing these commands asynchronously can improve performance in some apps. However, you should always measure the actual performance benefits before enabling this capability.</p></blockquote>
+
+<p><a href="https://developer.apple.com/library/ios/documentation/GraphicsImaging/Reference/CALayer_class/Introduction/Introduction.html#//apple_ref/occ/instp/CALayer/drawsAsynchronously">Source</a></p>
+
+<blockquote><p>Any drawing that you do in your delegate’s drawLayer:inContext: method or your view’s drawRect: method normally occurs synchronously on your app’s main thread. In some situations, though, drawing your content synchronously might not offer the best performance. If you notice that your animations are not performing well, you might try enabling the drawsAsynchronously property on your layer to move those operations to a background thread. If you do so, make sure your drawing code is thread safe.</p></blockquote>
+
+<p><a href="https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/CoreAnimation_guide/ImprovingAnimationPerformance/ImprovingAnimationPerformance.html">Source</a></p>
+
+<h5>@property CGPathRef shadowPath</h5>
+
+<p>如果要操作 <code>CALayer</code> 的阴影属性，推荐设置 layer 的 <code>shadowPath</code> 属性，系统将会缓存阴影减少不必要的重绘。但当改变 layer 的 bounds 时，一定要重设 <code>shadowPath</code>。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='objective-c'><span class='line'><span class="n">CALayer</span> <span class="o">*</span><span class="n">layer</span> <span class="o">=</span> <span class="n">view</span><span class="p">.</span><span class="n">layer</span><span class="p">;</span>
+</span><span class='line'><span class="n">layer</span><span class="p">.</span><span class="n">shadowOpacity</span> <span class="o">=</span> <span class="mf">0.5f</span><span class="p">;</span>
+</span><span class='line'><span class="n">layer</span><span class="p">.</span><span class="n">shadowRadius</span> <span class="o">=</span> <span class="mf">10.0f</span><span class="p">;</span>
+</span><span class='line'><span class="n">layer</span><span class="p">.</span><span class="n">shadowOffset</span> <span class="o">=</span> <span class="n">CGSizeMake</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">,</span> <span class="mf">10.0f</span><span class="p">);</span>
+</span><span class='line'><span class="n">UIBezierPath</span> <span class="o">*</span><span class="n">bezierPath</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIBezierPath</span> <span class="nl">bezierPathWithRect:</span><span class="n">layer</span><span class="p">.</span><span class="n">bounds</span><span class="p">];</span>
+</span><span class='line'><span class="n">layer</span><span class="p">.</span><span class="n">shadowPath</span> <span class="o">=</span> <span class="n">bezierPath</span><span class="p">.</span><span class="n">CGPath</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>Letting Core Animation determine the shape of a shadow can be expensive and impact your app’s performance. Rather than letting Core Animation determine the shape of the shadow, specify the shadow shape explicitly using the shadowPath property of CALayer. When you specify a path object for this property, Core Animation uses that shape to draw and cache the shadow effect. For layers whose shape never changes or rarely changes, this greatly improves performance by reducing the amount of rendering done by Core Animation.</p></blockquote>
+
+<p><a href="https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/CoreAnimation_guide/ImprovingAnimationPerformance/ImprovingAnimationPerformance.html">Source</a></p>
+
+<h5>@property BOOL shouldRasterize</h5>
+
+<p>如果 layer 只需要绘制依此，那么可以设置 <code>CALayer</code> 的属性 <code>shouldRasterize</code> 为 <code>YES</code>。但是如果该 layer 让然会被移动、缩放或者变形，那么将 <code>shouldRasterize</code> 设置为 <code>YES</code> 会损伤绘制性能，因为系统每次绘制完后会尝试再次重绘。</p>
+
+<blockquote><p>When the value of this property is YES, the layer is rendered as a bitmap in its local coordinate space and then composited to the destination with any other content. Shadow effects and any filters in the filters property are rasterized and included in the bitmap.</p></blockquote>
+
+<p><a href="https://developer.apple.com/library/mac/documentation/GraphicsImaging/Reference/CALayer_class/Introduction/Introduction.html#//apple_ref/occ/instp/CALayer/shouldRasterize">Source</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Yong Li</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-27T11:04:22+08:00" pubdate data-updated="true">Apr 27<span>th</span>, 2014</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/03/09/lets-build-nsobject/" title="Previous Post: 动手创建 NSObject">&laquo; 动手创建 NSObject</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/04/27/ios-performance/">iOS App 性能备忘</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/09/lets-build-nsobject/">动手创建 NSObject</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/17/ios-frp/">iOS 的 ReactiveCocoa 函数式响应编程</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/01/11/my-2013/">我的 2013</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/01/11/hello-from-octopress/">Hello From Octopress</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Yong Li -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'liyong03';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://liyong03.github.io/blog/2014/04/27/ios-performance/';
+        var disqus_url = 'http://liyong03.github.io/blog/2014/04/27/ios-performance/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
