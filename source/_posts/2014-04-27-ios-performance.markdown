@@ -9,8 +9,6 @@ categories:
 
 本文译自[这里](https://github.com/danielamitay/iOS-App-Performance-Cheatsheet).
 
-# iOS App 性能备忘
-
 **本备忘收集了很多可以提高 iOS 中 Objective-C 代码性能的代码片段和配置**
 
 这些文档中大部分代码片段和配置包括：将平时随手使用会用到的优先考虑灵活性而不是性能的高级 API，替换为功能相同的底层 API；一些会影响到绘制性能的类属性配置。对于 app 性能来说，好的架构和恰当的多线程总是很重要的，但是有时需要具体问题具体对待。
@@ -19,24 +17,19 @@ categories:
 
 **iOS App 性能备忘** 按照 Objective-C framework 组织为不同章节的 Markdown 文件：
 
-- [**Foundation**](Foundation.md)
-	- [NSDateFormatter](Foundation.md#nsdateformatter)
-	- [NSFileManager](Foundation.md#nsfilemanager)
-	- [NSObjCRuntime](Foundation.md#nsobjcruntime)
-	- [NSString](Foundation.md#nsstring)
-- [**UIKit**](UIKit.md)
-	- [UIImage](UIKit.md#uiimage)
-	- [UIView](UIKit.md#uiview)
-- [**QuartzCore**](QuartzCore.md)
-	- [CALayer](QuartzCore.md#calayer)
+- [**Foundation**](#Foundation)
+	- [NSDateFormatter](#nsdateformatter)
+	- [NSFileManager](#nsfilemanager)
+	- [NSObjCRuntime](#nsobjcruntime)
+	- [NSString](#nsstring)
+- [**UIKit**](#UIKit)
+	- [UIImage](#uiimage)
+	- [UIView](#uiview)
+- [**QuartzCore**](#QuartzCore)
+	- [CALayer](#calayer)
 
 
 # Foundation
-
-- [NSDateFormatter](#nsdateformatter)
-- [NSFileManager](#nsfilemanager)
-- [NSObjCRuntime](#nsobjcruntime)
-- [NSString](#nsstring)
 
 ---
 
@@ -168,9 +161,6 @@ free(buffer);
 
 # UIKit
 
-- [UIImage](#uiimage)
-- [UIView](#uiview)
-
 ---
 
 ### UIImage
@@ -202,8 +192,6 @@ free(buffer);
 当设置一个 `UIView` 的 frame 属性时，应该保证坐标值和像素位置对齐，否则将会触发反锯齿降低性能，也有可能引起图形界面的边界模糊（译者注：尤其是涉及到绘制文字时将会引起文字模糊不清，非 retina 设备特别明显）。一种简单直接的办法就是使用 `CGRectIntegral()` 自动将 `CGRect` 的值四舍五入到整数。对于像素密度大于1的设备，可以将坐标值近似为 `1.0f / screen.scale` 整数倍。
 
 # QuartzCore
-
-- [CALayer](#calayer)
 
 ---
 
