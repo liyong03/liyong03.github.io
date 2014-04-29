@@ -6,11 +6,11 @@ comments: true
 sharing: true
 footer: true
 ---
-An iOS Developer at Beijing.
+iOS Developer living in Beijing.
 
-Github:[liyong03](https://github.com/liyong03)
+You can find me by:
 
-Twitter:[@liyong03](https://twitter.com/liyong03)
-
-Linkedin:[Yong Li](http://www.linkedin.com/profile/view?id=66009369)
+- Github:[liyong03](https://github.com/liyong03)
+- Twitter:[@liyong03](https://twitter.com/liyong03)
+- Linkedin:[Yong Li](http://www.linkedin.com/profile/view?id=66009369)
 
