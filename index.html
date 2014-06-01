@@ -9,7 +9,7 @@
   <meta name="author" content="Yong Li">
 
   
-  <meta name="description" content="本文译自这里. 本备忘收集了很多可以提高 iOS 中 Objective-C 代码性能的代码片段和配置 这些文档中大部分代码片段和配置包括：将平时随手使用会用到的优先考虑灵活性而不是性能的高级 API，替换为功能相同的底层 API；一些会影响到绘制性能的类属性配置。对于 app 性能来说， &hellip;">
+  <meta name="description" content="Facebook 最新的 App Paper 包含了很多丰富的动画元素，为此 Facebook 甚至设计了一款 iOS 的动画引擎 pop。整个 Paper 的动画设计中另一个很有特色的动画是文字的闪光效果。 这个效果其实和 iPhone 的锁屏文字效果非常类似。 Facebook Shimmer &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,91 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/01/facebook-shimmer/">Facebook Shimmer 实现原理</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-01T14:33:57+08:00" pubdate data-updated="true">Jun 1<span>st</span>, 2014</time>
+        
+           | <a href="/blog/2014/06/01/facebook-shimmer/#disqus_thread"
+             data-disqus-identifier="http://liyong03.github.io/blog/2014/06/01/facebook-shimmer/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Facebook 最新的 App <a href="https://itunes.apple.com/us/app/paper-stories-from-facebook/id794163692?mt=8">Paper</a> 包含了很多丰富的动画元素，为此 Facebook 甚至设计了一款 iOS 的动画引擎 <a href="https://github.com/facebook/pop">pop</a>。整个 Paper 的动画设计中另一个很有特色的动画是文字的闪光效果。</p>
+
+<p><img src="/images/shimmer.gif" alt="Shimmer" /></p>
+
+<p>这个效果其实和 iPhone 的锁屏文字效果非常类似。</p>
+
+<p><img src="/images/ios_lock_text.gif" alt="lock screen text animation" /></p>
+
+<h5>Facebook Shimmer</h5>
+
+<p>Facebook 最近在 Paper 中实现这种文字效果的部分开源了出来，就叫做 <a href="https://github.com/facebook/shimmer">Shimmer</a>。使用 Shimmer 可以很容易实现这种文字闪光的效果。</p>
+
+<p>但是 Shimmer 不仅仅局限于对文字做删光效果，它可以实现任何 view 的闪光效果，如果使用图片做内容，可以实现图像内容的闪光。这样可以实现某些 logo 的闪光效果，甚至可以用来实现反光效果。</p>
+
+<h5>Shimmer 原理分析</h5>
+
+<p>Shimmer 是怎么实现这种效果的呢？通过阅读源码可以了解到（Shimmer 代码非常短，很容易阅读），其内部是依靠 Core Animation 来实现的。</p>
+
+<p>Shimmer 的内部包含两个 CALayer， 一个是展示内容的 contentlayer， 另一个是完成闪光效果的 masklayer。</p>
+
+<p>这两个 CALayer 通过两个步骤来实现闪光: 遮罩（mask） 和 滑动（slide）。</p>
+
+<h6>1: 遮罩（Mask）</h6>
+
+<p>顾名思义，遮罩的作用就是要让闪光效果只是对文字部分起作用，而不是文字所在的整个 view。这一步通过 CALayer 的 mask 属性实现。Shimmer 将 masklayer 设置为 contentlayer 的 mask。先来看看 CALayer 关于 mask 的解释：</p>
+
+<blockquote><p>The layer’s alpha channel determines how much of the layer’s content and background shows through. Fully or partially opaque pixels allow the underlying content to show through but fully transparent pixels block that content.</p>
+
+<p>The default value of this property is nil nil. When configuring a mask, remember to set the size and position of the mask layer to ensure it is aligned properly with the layer it masks.</p></blockquote>
+
+<p>Shimmer 中利用这一点，通过设置 masklayer 中 alpha 通道的效果来实现闪光效果中的高亮部分。首先将 contentlayer 中的内容设置为白色，通过 masklayer 的遮罩，对应 masklayer 中 alpha 小的部分将会透出一些 contentlayer 的背景，而 alpha 大的部分将会显示出白色的高亮。剩下的工作就是要让这些高亮动起来了。</p>
+
+<h6>2: 滑动</h6>
+
+<p>要实现滑动效果，其实非常简单，我们可以将通过设置 masklayer 的 position 来控制其与 contentlayer 做 mask 的部分，那么，我们可以通过将 masklayer 的尺寸放大，然后保证调整 position 的时候能完全遮罩住 contentlayer 即可，这样就实现了闪光部分的移动，从而实现了闪光效果。下面这张图很好的描述了整个滑动的原理（图片取自<a href="http://css-tricks.com/slide-to-unlock/">这里</a>）：</p>
+
+<p><img src="/images/animatedbackground.png" alt="" /></p>
+
+<p>通过调整 masklayer 中 alpha 通道的形状，可以实现不同的闪光效果。例如如果使用圆形光斑效果的 alpha 通道，那么就可以实现 iPhone 本身锁屏的文字滑动效果了。</p>
+
+<h5>总结</h5>
+
+<p>从整个 Shimmer 的实现来看，Core Animation 本身强大的功能确实为 iOS 实现很多漂亮的动画带来了可能。但是大部分 iOS 开发者却没有深度掌握和挖掘出这些潜能来。Facebook Shimmer 对于我们或许能够带来某种启发，iOS 系统中很多看似复杂的动画效果其实都可以用 Core Animation 来实现，而不是某些不存在的私有 API。</p>
+
+<p>另 1：对于想要更深入了解 Core Animation 的可以参考阅读 <a href="http://www.objc.io/issue-12/">Objc.io 第12期</a>和<a href="http://www.amazon.com/iOS-Core-Animation-Advanced-Techniques-ebook/dp/B00EHJCORC/ref=sr_1_1?ie=UTF8&amp;qid=1401552094&amp;sr=8-1&amp;keywords=ios+core+animation+advanced+techniques">《iOS Core Animation Advanced Techniques》</a>。</p>
+
+<p>另 2：<a href="http://css-tricks.com/slide-to-unlock/">这里</a>是一篇利用 css 实现 iPhone 锁屏文字动画的文章，原理与本文描述类似，可以参考。</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1338,6 +1423,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/06/01/facebook-shimmer/">Facebook Shimmer 实现原理</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/04/27/ios-performance/">iOS App 性能备忘</a>
       </li>
     
@@ -1351,10 +1440,6 @@
     
       <li class="post">
         <a href="/blog/2014/01/11/my-2013/">我的 2013</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/01/11/hello-from-octopress/">Hello From Octopress</a>
       </li>
     
   </ul>
