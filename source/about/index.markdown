@@ -6,7 +6,11 @@ comments: true
 sharing: true
 footer: true
 ---
-iOS Developer living in Beijing.
+iOS Developer living in Beijing. 
+
+I made iOS Flickr 2.x. 
+
+I like coding, open sourcinh, reading books and sports.
 
 You can find me by:
 
