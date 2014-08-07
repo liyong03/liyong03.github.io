@@ -9,7 +9,26 @@
   <meta name="author" content="Yong Li">
 
   
-  <meta name="description" content="Facebook 最新的 App Paper 包含了很多丰富的动画元素，为此 Facebook 甚至设计了一款 iOS 的动画引擎 pop。整个 Paper 的动画设计中另一个很有特色的动画是文字的闪光效果。 这个效果其实和 iPhone 的锁屏文字效果非常类似。 Facebook Shimmer &hellip;">
+  <meta name="description" content="本文翻译自这篇文章，本文中所有的代码都放在Github。 我将在本文中概述一个使用 Swift 完成的处理 JSON 的解析库。一个 JSON 的例子如下： 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+var json : [String: &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +97,270 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/07/parse-json-using-swift/">使用 Swift 解析 JSON</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-07T22:59:53+08:00" pubdate data-updated="true">Aug 7<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/08/07/parse-json-using-swift/#disqus_thread"
+             data-disqus-identifier="http://liyong03.github.io/blog/2014/08/07/parse-json-using-swift/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本文翻译自<a href="http://chris.eidhof.nl/posts/json-parsing-in-swift.html">这篇文章</a>，本文中所有的代码都放在<a href="https://gist.github.com/chriseidhof/4c071de50461a802874e">Github</a>。</p>
+
+<p>我将在本文中概述一个使用 Swift 完成的处理 JSON 的解析库。一个 JSON 的例子如下：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="err">var</span> <span class="err">json</span> <span class="err">:</span> <span class="p">[</span><span class="err">String:</span> <span class="err">AnyObject</span><span class="p">]</span> <span class="err">=</span> <span class="p">[</span>
+</span><span class='line'>  <span class="s2">&quot;stat&quot;</span><span class="err">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;blogs&quot;</span><span class="err">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;blog&quot;</span><span class="err">:</span> <span class="p">[</span>
+</span><span class='line'>      <span class="p">[</span>
+</span><span class='line'>        <span class="s2">&quot;id&quot;</span> <span class="err">:</span> <span class="mi">73</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;name&quot;</span> <span class="err">:</span> <span class="s2">&quot;Bloxus test&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;needspassword&quot;</span> <span class="err">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;url&quot;</span> <span class="err">:</span> <span class="s2">&quot;http://remote.bloxus.com/&quot;</span>
+</span><span class='line'>      <span class="p">],</span>
+</span><span class='line'>      <span class="p">[</span>
+</span><span class='line'>        <span class="s2">&quot;id&quot;</span> <span class="err">:</span> <span class="mi">74</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;name&quot;</span> <span class="err">:</span> <span class="s2">&quot;Manila Test&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;needspassword&quot;</span> <span class="err">:</span> <span class="kc">false</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;url&quot;</span> <span class="err">:</span> <span class="s2">&quot;http://flickrtest1.userland.com/&quot;</span>
+</span><span class='line'>      <span class="p">]</span>
+</span><span class='line'>    <span class="p">]</span>
+</span><span class='line'>  <span class="p">]</span>
+</span><span class='line'><span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最具挑战的部分就是如何将该数据转换成如下 Swift 结构体的数组：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="k">struct</span> <span class="n">Blog</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">let</span> <span class="kt">id</span><span class="o">:</span> <span class="n">Int</span>
+</span><span class='line'>    <span class="n">let</span> <span class="nl">name:</span> <span class="n">String</span>
+</span><span class='line'>    <span class="n">let</span> <span class="n">needsPassword</span> <span class="o">:</span> <span class="n">Bool</span>
+</span><span class='line'>    <span class="n">let</span> <span class="nl">url:</span> <span class="n">NSURL</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我们首先来看最终的解析函数，它包含两个运算法：>>= 和 &lt;*> 。这两个运算符或许看起来很陌生，但是解析整个 JSON 结构就是这么简单。本文其他部分将会解释这些库代码。下面的解析代码是这样工作的：如果 JSON 是不合法的（比如 name 不存在或者 id 不是整型）最终结果将是 nil 。我们不需要反射（reflection）和 KVO ，仅仅需要几个函数和一些聪明的组合方式：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">func</span> <span class="n">parseBlog</span><span class="p">(</span><span class="nl">blog:</span> <span class="n">AnyObject</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Blog</span><span class="o">?</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">asDict</span><span class="p">(</span><span class="n">blog</span><span class="p">)</span> <span class="o">&gt;&gt;=</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">mkBlog</span> <span class="o">&lt;*&gt;</span> <span class="kt">int</span><span class="p">(</span><span class="n">$0</span><span class="p">,</span><span class="s">&quot;id&quot;</span><span class="p">)</span>
+</span><span class='line'>               <span class="o">&lt;*&gt;</span> <span class="n">string</span><span class="p">(</span><span class="n">$0</span><span class="p">,</span><span class="s">&quot;name&quot;</span><span class="p">)</span>
+</span><span class='line'>               <span class="o">&lt;*&gt;</span> <span class="n">bool</span><span class="p">(</span><span class="n">$0</span><span class="p">,</span><span class="s">&quot;needspassword&quot;</span><span class="p">)</span>
+</span><span class='line'>               <span class="o">&lt;*&gt;</span> <span class="p">(</span><span class="n">string</span><span class="p">(</span><span class="n">$0</span><span class="p">,</span> <span class="s">&quot;url&quot;</span><span class="p">)</span> <span class="o">&gt;&gt;=</span> <span class="n">toURL</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">let</span> <span class="n">parsed</span> <span class="o">:</span> <span class="p">[</span><span class="n">Blog</span><span class="p">]</span><span class="o">?</span> <span class="o">=</span> <span class="n">dictionary</span><span class="p">(</span><span class="n">json</span><span class="p">,</span> <span class="s">&quot;blogs&quot;</span><span class="p">)</span> <span class="o">&gt;&gt;=</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">array</span><span class="p">(</span><span class="n">$0</span><span class="p">,</span> <span class="s">&quot;blog&quot;</span><span class="p">)</span> <span class="o">&gt;&gt;=</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">join</span><span class="p">(</span><span class="n">$0</span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="n">parseBlog</span><span class="p">))</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的代码到底做了什么呢？我们来仔细看看这些最重要的函数。首先来看看 dictionary 函数，它接受一个 String 到 AnyObject 的字典，返回另一个具有指定 key 的字典：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">func</span> <span class="n">dictionary</span><span class="p">(</span><span class="nl">input:</span> <span class="p">[</span><span class="nl">String:</span> <span class="n">AnyObject</span><span class="p">],</span> <span class="nl">key:</span> <span class="n">String</span><span class="p">)</span> <span class="o">-&gt;</span>  <span class="p">[</span><span class="nl">String:</span> <span class="n">AnyObject</span><span class="p">]</span><span class="o">?</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">input</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">&gt;&gt;=</span> <span class="p">{</span> <span class="n">$0</span> <span class="n">as</span><span class="o">?</span> <span class="p">[</span><span class="nl">String:</span><span class="n">AnyObject</span><span class="p">]</span> <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>例如在前面的 JSON 例子中，我们期望 key &ldquo;blogs&rdquo; 包含一个字典。如果字典存在，上述函数返回该字典，否则返回 nil 。我们可以对 Array、String、Integer 写出同样的方法（下面只是生命，完整代码见 Github）：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">func</span> <span class="n">array</span><span class="p">(</span><span class="nl">input:</span> <span class="p">[</span><span class="nl">String:</span><span class="n">AnyObject</span><span class="p">],</span> <span class="nl">key:</span> <span class="n">String</span><span class="p">)</span> <span class="o">-&gt;</span>  <span class="p">[</span><span class="n">AnyObject</span><span class="p">]</span><span class="o">?</span>
+</span><span class='line'><span class="n">func</span> <span class="n">string</span><span class="p">(</span><span class="nl">input:</span> <span class="p">[</span><span class="nl">String:</span><span class="n">AnyObject</span><span class="p">],</span> <span class="nl">key:</span> <span class="n">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">String</span><span class="o">?</span>
+</span><span class='line'><span class="n">func</span> <span class="kt">int</span><span class="p">(</span><span class="nl">input:</span> <span class="p">[</span><span class="nl">NSObject:</span><span class="n">AnyObject</span><span class="p">],</span> <span class="nl">key:</span> <span class="n">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Int</span><span class="o">?</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>现在，我们来看一下 JSON 例子的完整结构。它本身就是一个字典，包含一个 key 为 &ldquo;blogs&rdquo; 的另一个字典。该字典包含一个 key 为 &ldquo;blog&rdquo; 的 array 。我们可以用下面的代码表达上述结构：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="k">if</span> <span class="n">let</span> <span class="n">blogsDict</span> <span class="o">=</span> <span class="n">dictionary</span><span class="p">(</span><span class="n">parsedJSON</span><span class="p">,</span> <span class="s">&quot;blogs&quot;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">let</span> <span class="n">blogsArray</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">blogsDict</span><span class="p">,</span> <span class="s">&quot;blog&quot;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>         <span class="c1">// Do something with the blogs array</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我么可以实现一个 >>= 操作来代替，接受一个 optional 参数，当该参数不为 nil 的时候，对其使用一个函数。该操作符使用 flatten 函数，flatten 函数将嵌套的 optional 展开：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">operator</span> <span class="n">infix</span> <span class="o">&gt;&gt;=</span> <span class="p">{}</span>
+</span><span class='line'><span class="err">@</span><span class="n">infix</span> <span class="n">func</span> <span class="o">&gt;&gt;=</span> <span class="o">&lt;</span><span class="n">U</span><span class="p">,</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">optional</span> <span class="o">:</span> <span class="n">T</span><span class="o">?</span><span class="p">,</span> <span class="n">f</span> <span class="o">:</span> <span class="n">T</span> <span class="o">-&gt;</span> <span class="n">U</span><span class="o">?</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">U</span><span class="o">?</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">flatten</span><span class="p">(</span><span class="n">optional</span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">func</span> <span class="n">flatten</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&gt;</span><span class="p">(</span><span class="nl">x:</span> <span class="n">A</span><span class="o">??</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">A</span><span class="o">?</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">let</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="p">{</span> <span class="k">return</span> <span class="n">y</span> <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nb">nil</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>另一个被频繁使用的是 &lt;*> 操作符。例如下面的代码是用来解析单个 blog 的：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">mkBlog</span> <span class="o">&lt;*&gt;</span> <span class="kt">int</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span><span class="s">&quot;id&quot;</span><span class="p">)</span>
+</span><span class='line'>       <span class="o">&lt;*&gt;</span> <span class="n">string</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span><span class="s">&quot;name&quot;</span><span class="p">)</span>
+</span><span class='line'>       <span class="o">&lt;*&gt;</span> <span class="n">bool</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span><span class="s">&quot;needspassword&quot;</span><span class="p">)</span>
+</span><span class='line'>       <span class="o">&lt;*&gt;</span> <span class="p">(</span><span class="n">string</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span> <span class="s">&quot;url&quot;</span><span class="p">)</span> <span class="o">&gt;&gt;=</span> <span class="n">toURL</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当所有的 optional 参数都是 non-nil 的时候该函数才能正常运行，上面的代码转化成：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">mkBlog</span><span class="p">(</span><span class="kt">int</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span><span class="s">&quot;id&quot;</span><span class="p">),</span> <span class="n">string</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span><span class="s">&quot;name&quot;</span><span class="p">),</span> <span class="n">bool</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span><span class="s">&quot;needspassword&quot;</span><span class="p">),</span> <span class="p">(</span><span class="n">string</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span> <span class="s">&quot;url&quot;</span><span class="p">)</span> <span class="o">&gt;&gt;=</span> <span class="n">toURL</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>所以，我们来看看操作符 &lt;*> 的定义。它接受两个 optional 的参数，左边的参数是一个函数。如果两个参数都不是 nil ，将会对右边的参数使用左边的函数参数：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">operator</span> <span class="n">infix</span> <span class="o">&lt;*&gt;</span> <span class="p">{</span> <span class="n">associativity</span> <span class="n">left</span> <span class="n">precedence</span> <span class="mi">150</span> <span class="p">}</span>
+</span><span class='line'><span class="n">func</span> <span class="o">&lt;*&gt;&lt;</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="o">&gt;</span><span class="p">(</span><span class="nl">f:</span> <span class="p">(</span><span class="n">A</span> <span class="o">-&gt;</span> <span class="n">B</span><span class="p">)</span><span class="o">?</span><span class="p">,</span> <span class="nl">x:</span> <span class="n">A</span><span class="o">?</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">B</span><span class="o">?</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">let</span> <span class="n">f1</span> <span class="o">=</span> <span class="n">f</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="n">let</span> <span class="n">x1</span> <span class="o">=</span> <span class="n">x</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">f1</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nb">nil</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>现在你有可能想知道 mkBlog 是做什么的吧。它是一个 <a href="http://en.wikipedia.org/wiki/Currying">curried</a> 函数用来包装我们的初始化函数。首先，我们有一个 (Int,String,Bool,NSURL) &ndash;> Blog 类型的函数。然后 curry 函数将其类型转化为 Int &ndash;> String &ndash;> Bool &ndash;> NSURL &ndash;> Blog ：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">let</span> <span class="n">mkBlog</span> <span class="o">=</span> <span class="n">curry</span> <span class="p">{</span><span class="kt">id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">needsPassword</span><span class="p">,</span> <span class="n">url</span> <span class="k">in</span>
+</span><span class='line'>   <span class="n">Blog</span><span class="p">(</span><span class="kt">id</span><span class="o">:</span> <span class="kt">id</span><span class="p">,</span> <span class="nl">name:</span> <span class="n">name</span><span class="p">,</span> <span class="nl">needsPassword:</span> <span class="n">needsPassword</span><span class="p">,</span> <span class="nl">url:</span> <span class="n">url</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我们将 mkBlog 和 &lt;*> 一起使用，我们来看第一行：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="c1">// mkBlog : Int -&gt; String -&gt; Bool -&gt; NSURL -&gt; Blog</span>
+</span><span class='line'><span class="c1">// int(dict,&quot;id&quot;) : Int?</span>
+</span><span class='line'><span class="n">let</span> <span class="n">step1</span> <span class="o">=</span> <span class="n">mkBlog</span> <span class="o">&lt;*&gt;</span> <span class="kt">int</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span><span class="s">&quot;id&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到，用 &lt;*> 将他们两个连起来，将会返回一个新的类型：(String &ndash;> Bool &ndash;> NSURL &ndash;> Blog)? ，然后和 string 函数结合：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">let</span> <span class="n">step2</span> <span class="o">=</span> <span class="n">step1</span> <span class="o">&lt;*&gt;</span> <span class="n">string</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span><span class="s">&quot;name&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我们得到：(Bool &ndash;> NSURL &ndash;> Blog)? ，一直这样结合，最后将会得到类型为 Blog? 的值。</p>
+
+<p>希望你现在能明白整个代码是如何在一起工作的了。通过创建一些辅助函数和运算符，我们可以让解析强类型的 JSON 数据变得非常容易。如果不用 optional 类型，那么我们将会使用完全不同的类型，并且包含一些错误信息，但这将是另外的 blog 的话题了。</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1423,6 +1706,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/08/07/parse-json-using-swift/">使用 Swift 解析 JSON</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/06/01/facebook-shimmer/">Facebook Shimmer 实现原理</a>
       </li>
     
@@ -1436,10 +1723,6 @@
     
       <li class="post">
         <a href="/blog/2014/02/17/ios-frp/">iOS 的 ReactiveCocoa 函数式响应编程</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/01/11/my-2013/">我的 2013</a>
       </li>
     
   </ul>

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Swift | Yong的Blog]]></title>
+  <link href="http://liyong03.github.io/blog/categories/swift/atom.xml" rel="self"/>
+  <link href="http://liyong03.github.io/"/>
+  <updated>2014-08-07T23:10:04+08:00</updated>
+  <id>http://liyong03.github.io/</id>
+  <author>
+    <name><![CDATA[Yong Li]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[使用 Swift 解析 JSON]]></title>
+    <link href="http://liyong03.github.io/blog/2014/08/07/parse-json-using-swift/"/>
+    <updated>2014-08-07T22:59:53+08:00</updated>
+    <id>http://liyong03.github.io/blog/2014/08/07/parse-json-using-swift</id>
+    <content type="html"><![CDATA[<p>本文翻译自<a href="http://chris.eidhof.nl/posts/json-parsing-in-swift.html">这篇文章</a>，本文中所有的代码都放在<a href="https://gist.github.com/chriseidhof/4c071de50461a802874e">Github</a>。</p>
+
+<p>我将在本文中概述一个使用 Swift 完成的处理 JSON 的解析库。一个 JSON 的例子如下：</p>
+
+<p>``` json</p>
+
+<pre><code>var json : [String: AnyObject] = [
+  "stat": "ok",
+  "blogs": [
+    "blog": [
+      [
+        "id" : 73,
+        "name" : "Bloxus test",
+        "needspassword" : true,
+        "url" : "http://remote.bloxus.com/"
+      ],
+      [
+        "id" : 74,
+        "name" : "Manila Test",
+        "needspassword" : false,
+        "url" : "http://flickrtest1.userland.com/"
+      ]
+    ]
+  ]
+]
+</code></pre>
+
+<p>```</p>
+
+<p>最具挑战的部分就是如何将该数据转换成如下 Swift 结构体的数组：</p>
+
+<p>``` objc</p>
+
+<pre><code>struct Blog {
+    let id: Int
+    let name: String
+    let needsPassword : Bool
+    let url: NSURL
+}
+</code></pre>
+
+<p>```</p>
+
+<p>我们首先来看最终的解析函数，它包含两个运算法：>>= 和 &lt;*> 。这两个运算符或许看起来很陌生，但是解析整个 JSON 结构就是这么简单。本文其他部分将会解释这些库代码。下面的解析代码是这样工作的：如果 JSON 是不合法的（比如 name 不存在或者 id 不是整型）最终结果将是 nil 。我们不需要反射（reflection）和 KVO ，仅仅需要几个函数和一些聪明的组合方式：</p>
+
+<p>``` objc</p>
+
+<pre><code>func parseBlog(blog: AnyObject) -&gt; Blog? {
+    return asDict(blog) &gt;&gt;= {
+        mkBlog &lt;*&gt; int($0,"id")
+               &lt;*&gt; string($0,"name")
+               &lt;*&gt; bool($0,"needspassword")
+               &lt;*&gt; (string($0, "url") &gt;&gt;= toURL)
+    }
+}
+let parsed : [Blog]? = dictionary(json, "blogs") &gt;&gt;= {
+    array($0, "blog") &gt;&gt;= {
+        join($0.map(parseBlog))
+    }
+}
+</code></pre>
+
+<p>```</p>
+
+<p>上面的代码到底做了什么呢？我们来仔细看看这些最重要的函数。首先来看看 dictionary 函数，它接受一个 String 到 AnyObject 的字典，返回另一个具有指定 key 的字典：</p>
+
+<p>``` objc</p>
+
+<pre><code>func dictionary(input: [String: AnyObject], key: String) -&gt;  [String: AnyObject]? {
+    return input[key] &gt;&gt;= { $0 as? [String:AnyObject] }
+}
+</code></pre>
+
+<p>```</p>
+
+<p>例如在前面的 JSON 例子中，我们期望 key &ldquo;blogs&rdquo; 包含一个字典。如果字典存在，上述函数返回该字典，否则返回 nil 。我们可以对 Array、String、Integer 写出同样的方法（下面只是生命，完整代码见 Github）：</p>
+
+<p>``` objc</p>
+
+<pre><code>func array(input: [String:AnyObject], key: String) -&gt;  [AnyObject]?
+func string(input: [String:AnyObject], key: String) -&gt; String?
+func int(input: [NSObject:AnyObject], key: String) -&gt; Int?
+</code></pre>
+
+<p>```</p>
+
+<p>现在，我们来看一下 JSON 例子的完整结构。它本身就是一个字典，包含一个 key 为 &ldquo;blogs&rdquo; 的另一个字典。该字典包含一个 key 为 &ldquo;blog&rdquo; 的 array 。我们可以用下面的代码表达上述结构：</p>
+
+<p>``` objc</p>
+
+<pre><code>if let blogsDict = dictionary(parsedJSON, "blogs") {
+    if let blogsArray = array(blogsDict, "blog") {
+         // Do something with the blogs array
+    }
+}
+</code></pre>
+
+<p>```</p>
+
+<p>我么可以实现一个 >>= 操作来代替，接受一个 optional 参数，当该参数不为 nil 的时候，对其使用一个函数。该操作符使用 flatten 函数，flatten 函数将嵌套的 optional 展开：</p>
+
+<p>``` objc</p>
+
+<pre><code>operator infix &gt;&gt;= {}
+@infix func &gt;&gt;= &lt;U,T&gt;(optional : T?, f : T -&gt; U?) -&gt; U? {
+    return flatten(optional.map(f))
+}
+func flatten&lt;A&gt;(x: A??) -&gt; A? {
+    if let y = x { return y }
+    return nil
+}
+</code></pre>
+
+<p>```</p>
+
+<p>另一个被频繁使用的是 &lt;*> 操作符。例如下面的代码是用来解析单个 blog 的：</p>
+
+<p>``` objc</p>
+
+<pre><code>mkBlog &lt;*&gt; int(dict,"id")
+       &lt;*&gt; string(dict,"name")
+       &lt;*&gt; bool(dict,"needspassword")
+       &lt;*&gt; (string(dict, "url") &gt;&gt;= toURL)
+</code></pre>
+
+<p>```</p>
+
+<p>当所有的 optional 参数都是 non-nil 的时候该函数才能正常运行，上面的代码转化成：</p>
+
+<p>``` objc</p>
+
+<pre><code>mkBlog(int(dict,"id"), string(dict,"name"), bool(dict,"needspassword"), (string(dict, "url") &gt;&gt;= toURL))
+</code></pre>
+
+<p>```</p>
+
+<p>所以，我们来看看操作符 &lt;*> 的定义。它接受两个 optional 的参数，左边的参数是一个函数。如果两个参数都不是 nil ，将会对右边的参数使用左边的函数参数：</p>
+
+<p>``` objc</p>
+
+<pre><code>operator infix &lt;*&gt; { associativity left precedence 150 }
+func &lt;*&gt;&lt;A, B&gt;(f: (A -&gt; B)?, x: A?) -&gt; B? {
+    if let f1 = f {
+        if let x1 = x {
+            return f1(x1)
+        }
+    }
+    return nil
+}
+</code></pre>
+
+<p>```</p>
+
+<p>现在你有可能想知道 mkBlog 是做什么的吧。它是一个 <a href="http://en.wikipedia.org/wiki/Currying">curried</a> 函数用来包装我们的初始化函数。首先，我们有一个 (Int,String,Bool,NSURL) &ndash;> Blog 类型的函数。然后 curry 函数将其类型转化为 Int &ndash;> String &ndash;> Bool &ndash;> NSURL &ndash;> Blog ：</p>
+
+<p>``` objc</p>
+
+<pre><code>let mkBlog = curry {id, name, needsPassword, url in 
+   Blog(id: id, name: name, needsPassword: needsPassword, url: url) 
+}
+</code></pre>
+
+<p>```</p>
+
+<p>我们将 mkBlog 和 &lt;*> 一起使用，我们来看第一行：</p>
+
+<p>``` objc</p>
+
+<pre><code>// mkBlog : Int -&gt; String -&gt; Bool -&gt; NSURL -&gt; Blog
+// int(dict,"id") : Int?
+let step1 = mkBlog &lt;*&gt; int(dict,"id")
+</code></pre>
+
+<p>```</p>
+
+<p>可以看到，用 &lt;*> 将他们两个连起来，将会返回一个新的类型：(String &ndash;> Bool &ndash;> NSURL &ndash;> Blog)? ，然后和 string 函数结合：</p>
+
+<p>``` objc</p>
+
+<pre><code>let step2 = step1 &lt;*&gt; string(dict,"name")
+</code></pre>
+
+<p>```</p>
+
+<p>我们得到：(Bool &ndash;> NSURL &ndash;> Blog)? ，一直这样结合，最后将会得到类型为 Blog? 的值。</p>
+
+<p>希望你现在能明白整个代码是如何在一起工作的了。通过创建一些辅助函数和运算符，我们可以让解析强类型的 JSON 数据变得非常容易。如果不用 optional 类型，那么我们将会使用完全不同的类型，并且包含一些错误信息，但这将是另外的 blog 的话题了。</p>
+]]></content>
+  </entry>
+  
+</feed>
