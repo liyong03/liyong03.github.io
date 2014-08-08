@@ -43,7 +43,7 @@ categories: swift ios programming
     }
 ```
 
-我们首先来看最终的解析函数，它包含两个运算法：>>= 和 <*> 。这两个运算符或许看起来很陌生，但是解析整个 JSON 结构就是这么简单。本文其他部分将会解释这些库代码。下面的解析代码是这样工作的：如果 JSON 是不合法的（比如 name 不存在或者 id 不是整型）最终结果将是 nil 。我们不需要反射（reflection）和 KVO ，仅仅需要几个函数和一些聪明的组合方式：
+我们首先来看最终的解析函数，它包含两个运算法：`>>=` 和 `<*>` 。这两个运算符或许看起来很陌生，但是解析整个 JSON 结构就是这么简单。本文其他部分将会解释这些库代码。下面的解析代码是这样工作的：如果 JSON 是不合法的（比如 name 不存在或者 id 不是整型）最终结果将是 `nil` 。我们不需要反射（reflection）和 KVO ，仅仅需要几个函数和一些聪明的组合方式：
 
 ``` objc
     func parseBlog(blog: AnyObject) -> Blog? {
@@ -61,7 +61,7 @@ categories: swift ios programming
     }
 ```
 
-上面的代码到底做了什么呢？我们来仔细看看这些最重要的函数。首先来看看 dictionary 函数，它接受一个 String 到 AnyObject 的字典，返回另一个具有指定 key 的字典：
+上面的代码到底做了什么呢？我们来仔细看看这些最重要的函数。首先来看看 dictionary 函数，它接受一个 `String` 到 `AnyObject` 的字典，返回另一个具有指定 key 的字典：
 
 ``` objc
     func dictionary(input: [String: AnyObject], key: String) ->  [String: AnyObject]? {
@@ -69,7 +69,7 @@ categories: swift ios programming
     }
 ```
 
-例如在前面的 JSON 例子中，我们期望 key "blogs" 包含一个字典。如果字典存在，上述函数返回该字典，否则返回 nil 。我们可以对 Array、String、Integer 写出同样的方法（下面只是生命，完整代码见 Github）：
+例如在前面的 JSON 例子中，我们期望 key = "blogs" 包含一个字典。如果字典存在，上述函数返回该字典，否则返回 nil 。我们可以对 `Array`、`String`、`Integer` 写出同样的方法（下面只是生命，完整代码见 Github）：
 
 ``` objc
     func array(input: [String:AnyObject], key: String) ->  [AnyObject]?
@@ -77,7 +77,7 @@ categories: swift ios programming
     func int(input: [NSObject:AnyObject], key: String) -> Int?
 ```
 
-现在，我们来看一下 JSON 例子的完整结构。它本身就是一个字典，包含一个 key 为 "blogs" 的另一个字典。该字典包含一个 key 为 "blog" 的 array 。我们可以用下面的代码表达上述结构：
+现在，我们来看一下 JSON 例子的完整结构。它本身就是一个字典，包含一个 key 为 "blogs" 的另一个字典。该字典包含一个 key 为 "blog" 的 `Array` 。我们可以用下面的代码表达上述结构：
 
 ``` objc
     if let blogsDict = dictionary(parsedJSON, "blogs") {
@@ -87,7 +87,7 @@ categories: swift ios programming
     }
 ```
 
-我么可以实现一个 >>= 操作来代替，接受一个 optional 参数，当该参数不为 nil 的时候，对其使用一个函数。该操作符使用 flatten 函数，flatten 函数将嵌套的 optional 展开：
+我么可以实现一个 >>= 操作来代替，接受一个 `optional` 参数，当该参数不为 `nil` 的时候，对其使用一个函数。该操作符使用 `flatten` 函数，`flatten` 函数将嵌套的 `optional` 展开：
 
 ``` objc
     operator infix >>= {}
@@ -100,7 +100,7 @@ categories: swift ios programming
     }
 ```
 
-另一个被频繁使用的是 <*> 操作符。例如下面的代码是用来解析单个 blog 的：
+另一个被频繁使用的是 `<*>` 操作符。例如下面的代码是用来解析单个 blog 的：
 
 ``` objc
     mkBlog <*> int(dict,"id")
@@ -109,13 +109,13 @@ categories: swift ios programming
            <*> (string(dict, "url") >>= toURL)
 ```
 
-当所有的 optional 参数都是 non-nil 的时候该函数才能正常运行，上面的代码转化成：
+当所有的 `optional` 参数都是 `non-nil` 的时候该函数才能正常运行，上面的代码转化成：
 
 ``` objc
     mkBlog(int(dict,"id"), string(dict,"name"), bool(dict,"needspassword"), (string(dict, "url") >>= toURL))
 ```
 
-所以，我们来看看操作符 <*> 的定义。它接受两个 optional 的参数，左边的参数是一个函数。如果两个参数都不是 nil ，将会对右边的参数使用左边的函数参数：
+所以，我们来看看操作符 `<*>` 的定义。它接受两个 `optional` 的参数，左边的参数是一个函数。如果两个参数都不是 `nil` ，将会对右边的参数使用左边的函数参数：
 
 ``` objc
     operator infix <*> { associativity left precedence 150 }
@@ -129,7 +129,7 @@ categories: swift ios programming
     }
 ```
 
-现在你有可能想知道 mkBlog 是做什么的吧。它是一个 [curried](http://en.wikipedia.org/wiki/Currying) 函数用来包装我们的初始化函数。首先，我们有一个 (Int,String,Bool,NSURL) -> Blog 类型的函数。然后 curry 函数将其类型转化为 Int -> String -> Bool -> NSURL -> Blog ：
+现在你有可能想知道 `mkBlog` 是做什么的吧。它是一个 [curried](http://en.wikipedia.org/wiki/Currying) 函数用来包装我们的初始化函数。首先，我们有一个 (Int,String,Bool,NSURL) -> Blog 类型的函数。然后 `curry` 函数将其类型转化为 `Int -> String -> Bool -> NSURL -> Blog` ：
 
 ``` objc
     let mkBlog = curry {id, name, needsPassword, url in 
@@ -137,7 +137,7 @@ categories: swift ios programming
     }
 ```
 
-我们将 mkBlog 和 <*> 一起使用，我们来看第一行：
+我们将 `mkBlog` 和 `<*>` 一起使用，我们来看第一行：
 
 ``` objc
     // mkBlog : Int -> String -> Bool -> NSURL -> Blog
@@ -145,12 +145,12 @@ categories: swift ios programming
     let step1 = mkBlog <*> int(dict,"id")
 ```
 
-可以看到，用 <*> 将他们两个连起来，将会返回一个新的类型：(String -> Bool -> NSURL -> Blog)? ，然后和 string 函数结合：
+可以看到，用 `<*>` 将他们两个连起来，将会返回一个新的类型：`(String -> Bool -> NSURL -> Blog)?` ，然后和 `string` 函数结合：
 
 ``` objc
     let step2 = step1 <*> string(dict,"name")
 ```
 
-我们得到：(Bool -> NSURL -> Blog)? ，一直这样结合，最后将会得到类型为 Blog? 的值。
+我们得到：`(Bool -> NSURL -> Blog)?` ，一直这样结合，最后将会得到类型为 `Blog?` 的值。
 
-希望你现在能明白整个代码是如何在一起工作的了。通过创建一些辅助函数和运算符，我们可以让解析强类型的 JSON 数据变得非常容易。如果不用 optional 类型，那么我们将会使用完全不同的类型，并且包含一些错误信息，但这将是另外的 blog 的话题了。
+希望你现在能明白整个代码是如何在一起工作的了。通过创建一些辅助函数和运算符，我们可以让解析强类型的 JSON 数据变得非常容易。如果不用 `optional` 类型，那么我们将会使用完全不同的类型，并且包含一些错误信息，但这将是另外的 blog 的话题了。
