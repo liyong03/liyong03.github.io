@@ -191,7 +191,7 @@ var json : [String: &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>我们首先来看最终的解析函数，它包含两个运算法：>>= 和 &lt;*> 。这两个运算符或许看起来很陌生，但是解析整个 JSON 结构就是这么简单。本文其他部分将会解释这些库代码。下面的解析代码是这样工作的：如果 JSON 是不合法的（比如 name 不存在或者 id 不是整型）最终结果将是 nil 。我们不需要反射（reflection）和 KVO ，仅仅需要几个函数和一些聪明的组合方式：</p>
+<p>我们首先来看最终的解析函数，它包含两个运算法：<code>&gt;&gt;=</code> 和 <code>&lt;*&gt;</code> 。这两个运算符或许看起来很陌生，但是解析整个 JSON 结构就是这么简单。本文其他部分将会解释这些库代码。下面的解析代码是这样工作的：如果 JSON 是不合法的（比如 name 不存在或者 id 不是整型）最终结果将是 <code>nil</code> 。我们不需要反射（reflection）和 KVO ，仅仅需要几个函数和一些聪明的组合方式：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -222,7 +222,7 @@ var json : [String: &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>上面的代码到底做了什么呢？我们来仔细看看这些最重要的函数。首先来看看 dictionary 函数，它接受一个 String 到 AnyObject 的字典，返回另一个具有指定 key 的字典：</p>
+<p>上面的代码到底做了什么呢？我们来仔细看看这些最重要的函数。首先来看看 dictionary 函数，它接受一个 <code>String</code> 到 <code>AnyObject</code> 的字典，返回另一个具有指定 key 的字典：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -233,7 +233,7 @@ var json : [String: &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>例如在前面的 JSON 例子中，我们期望 key &ldquo;blogs&rdquo; 包含一个字典。如果字典存在，上述函数返回该字典，否则返回 nil 。我们可以对 Array、String、Integer 写出同样的方法（下面只是生命，完整代码见 Github）：</p>
+<p>例如在前面的 JSON 例子中，我们期望 key = &ldquo;blogs&rdquo; 包含一个字典。如果字典存在，上述函数返回该字典，否则返回 nil 。我们可以对 <code>Array</code>、<code>String</code>、<code>Integer</code> 写出同样的方法（下面只是生命，完整代码见 Github）：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -244,7 +244,7 @@ var json : [String: &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>现在，我们来看一下 JSON 例子的完整结构。它本身就是一个字典，包含一个 key 为 &ldquo;blogs&rdquo; 的另一个字典。该字典包含一个 key 为 &ldquo;blog&rdquo; 的 array 。我们可以用下面的代码表达上述结构：</p>
+<p>现在，我们来看一下 JSON 例子的完整结构。它本身就是一个字典，包含一个 key 为 &ldquo;blogs&rdquo; 的另一个字典。该字典包含一个 key 为 &ldquo;blog&rdquo; 的 <code>Array</code> 。我们可以用下面的代码表达上述结构：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -259,7 +259,7 @@ var json : [String: &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>我么可以实现一个 >>= 操作来代替，接受一个 optional 参数，当该参数不为 nil 的时候，对其使用一个函数。该操作符使用 flatten 函数，flatten 函数将嵌套的 optional 展开：</p>
+<p>我么可以实现一个 >>= 操作来代替，接受一个 <code>optional</code> 参数，当该参数不为 <code>nil</code> 的时候，对其使用一个函数。该操作符使用 <code>flatten</code> 函数，<code>flatten</code> 函数将嵌套的 <code>optional</code> 展开：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -280,7 +280,7 @@ var json : [String: &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>另一个被频繁使用的是 &lt;*> 操作符。例如下面的代码是用来解析单个 blog 的：</p>
+<p>另一个被频繁使用的是 <code>&lt;*&gt;</code> 操作符。例如下面的代码是用来解析单个 blog 的：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -293,14 +293,14 @@ var json : [String: &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>当所有的 optional 参数都是 non-nil 的时候该函数才能正常运行，上面的代码转化成：</p>
+<p>当所有的 <code>optional</code> 参数都是 <code>non-nil</code> 的时候该函数才能正常运行，上面的代码转化成：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">mkBlog</span><span class="p">(</span><span class="kt">int</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span><span class="s">&quot;id&quot;</span><span class="p">),</span> <span class="n">string</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span><span class="s">&quot;name&quot;</span><span class="p">),</span> <span class="n">bool</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span><span class="s">&quot;needspassword&quot;</span><span class="p">),</span> <span class="p">(</span><span class="n">string</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span> <span class="s">&quot;url&quot;</span><span class="p">)</span> <span class="o">&gt;&gt;=</span> <span class="n">toURL</span><span class="p">))</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>所以，我们来看看操作符 &lt;*> 的定义。它接受两个 optional 的参数，左边的参数是一个函数。如果两个参数都不是 nil ，将会对右边的参数使用左边的函数参数：</p>
+<p>所以，我们来看看操作符 <code>&lt;*&gt;</code> 的定义。它接受两个 <code>optional</code> 的参数，左边的参数是一个函数。如果两个参数都不是 <code>nil</code> ，将会对右边的参数使用左边的函数参数：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -323,7 +323,7 @@ var json : [String: &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>现在你有可能想知道 mkBlog 是做什么的吧。它是一个 <a href="http://en.wikipedia.org/wiki/Currying">curried</a> 函数用来包装我们的初始化函数。首先，我们有一个 (Int,String,Bool,NSURL) &ndash;> Blog 类型的函数。然后 curry 函数将其类型转化为 Int &ndash;> String &ndash;> Bool &ndash;> NSURL &ndash;> Blog ：</p>
+<p>现在你有可能想知道 <code>mkBlog</code> 是做什么的吧。它是一个 <a href="http://en.wikipedia.org/wiki/Currying">curried</a> 函数用来包装我们的初始化函数。首先，我们有一个 (Int,String,Bool,NSURL) &ndash;> Blog 类型的函数。然后 <code>curry</code> 函数将其类型转化为 <code>Int -&gt; String -&gt; Bool -&gt; NSURL -&gt; Blog</code> ：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -334,7 +334,7 @@ var json : [String: &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>我们将 mkBlog 和 &lt;*> 一起使用，我们来看第一行：</p>
+<p>我们将 <code>mkBlog</code> 和 <code>&lt;*&gt;</code> 一起使用，我们来看第一行：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -345,16 +345,16 @@ var json : [String: &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>可以看到，用 &lt;*> 将他们两个连起来，将会返回一个新的类型：(String &ndash;> Bool &ndash;> NSURL &ndash;> Blog)? ，然后和 string 函数结合：</p>
+<p>可以看到，用 <code>&lt;*&gt;</code> 将他们两个连起来，将会返回一个新的类型：<code>(String -&gt; Bool -&gt; NSURL -&gt; Blog)?</code> ，然后和 <code>string</code> 函数结合：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">let</span> <span class="n">step2</span> <span class="o">=</span> <span class="n">step1</span> <span class="o">&lt;*&gt;</span> <span class="n">string</span><span class="p">(</span><span class="n">dict</span><span class="p">,</span><span class="s">&quot;name&quot;</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>我们得到：(Bool &ndash;> NSURL &ndash;> Blog)? ，一直这样结合，最后将会得到类型为 Blog? 的值。</p>
+<p>我们得到：<code>(Bool -&gt; NSURL -&gt; Blog)?</code> ，一直这样结合，最后将会得到类型为 <code>Blog?</code> 的值。</p>
 
-<p>希望你现在能明白整个代码是如何在一起工作的了。通过创建一些辅助函数和运算符，我们可以让解析强类型的 JSON 数据变得非常容易。如果不用 optional 类型，那么我们将会使用完全不同的类型，并且包含一些错误信息，但这将是另外的 blog 的话题了。</p>
+<p>希望你现在能明白整个代码是如何在一起工作的了。通过创建一些辅助函数和运算符，我们可以让解析强类型的 JSON 数据变得非常容易。如果不用 <code>optional</code> 类型，那么我们将会使用完全不同的类型，并且包含一些错误信息，但这将是另外的 blog 的话题了。</p>
 </div>
   
   
